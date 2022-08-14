@@ -1,3 +1,13 @@
+const io = require("@pm2/io");
+
+io.init({
+    metrics: {
+        network: {
+            ports: true,
+        },
+    },
+});
+
 const { Telegraf } = require("telegraf");
 const dotenv = require("dotenv").config();
 
