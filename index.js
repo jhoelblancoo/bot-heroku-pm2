@@ -17,6 +17,11 @@ function main() {
         console.log(ctx.from.id);
     });
 
+    bot.hears("jhoel", ctx => {
+        ctx.reply("Hola jhoel!");
+        console.log(ctx.from.id);
+    });
+
     bot.launch();
 }
 
