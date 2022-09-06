@@ -206,4 +206,4 @@ async function createNewUserDB(newBot) {
     }
 }
 
-connectDB();
+// connectDB();
