@@ -33,7 +33,11 @@ const User = sequelize.define(
 const Bots = sequelize.define(
     "bots", {
         token: DataTypes.STRING,
-        id_user: DataTypes.INTEGER,
+        id_bot: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
+        },
     }, { tableName: "bots", schema: "public", timestamps: false }
 );
 
@@ -43,7 +47,11 @@ const Bots = sequelize.define(
 const Functions = sequelize.define(
     "functions", {
         name_function: DataTypes.STRING,
-        id_user: DataTypes.INTEGER,
+        id_function: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
+        },
     }, { tableName: "functions", schema: "public", timestamps: false }
 );
 
@@ -56,15 +64,20 @@ const BotsFunctions = sequelize.define(
     "bots_functions", {
         fk_id_bot: DataTypes.INTEGER,
         fk_id_function: DataTypes.INTEGER,
+        nickname: DataTypes.STRING,
     }, { tableName: "bots_functions", schema: "public", timestamps: false }
 );
 
-// makes a join table between the users and projects
-// 'through' key sets the name of the table: user_projects
-Functions.belongsToMany(Bots, {
-    through: BotsFunctions,
-    foreignKey: "id_function",
+BotsFunctions.belongsTo(Functions, {
+    foreignKey: "fk_id_function",
+    sourceKey: "id_function",
 });
-Bots.belongsToMany(Functions, { through: BotsFunctions, foreignKey: "id_bot" });
+
+Functions.hasMany(BotsFunctions, {
+    foreignKey: "fk_id_function",
+});
+
+BotsFunctions.belongsTo(Bots, { foreignKey: "fk_id_bot", sourceKey: "id_bot" });
+Bots.hasMany(BotsFunctions, { foreignKey: "fk_id_bot" });
 
 module.exports = { User, Bots, Functions, BotsFunctions };

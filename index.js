@@ -1,14 +1,11 @@
 const { Telegraf } = require("telegraf");
 const { User, Bots, Functions, BotsFunctions } = require("./src/db_model.js");
+const { col } = require("sequelize");
 
-const Bot1 = "5469474008:AAHsNkCs06eI2-fxsxbBSRzf-7KLWtJ2r5g";
-const Bot2 = "5610536765:AAH4iZ2gqwtV1NyU9ESV_0TGHai9P5Lg1VA";
-const Bot3 = "5746503539:AAGIQURCOkb9L6RhQxiYpeLA42OjsAeSwgU";
-const BOTS_ARRAY = [
-    { BOT_TOKEN: Bot1, BOT_FUNCTIONS: ["hola", "chao"] },
-    { BOT_TOKEN: Bot2, BOT_FUNCTIONS: [] },
-    { BOT_TOKEN: Bot3, BOT_FUNCTIONS: ["jhoel", "chao"] },
-];
+// const Bot1 = "5469474008:AAHsNkCs06eI2-fxsxbBSRzf-7KLWtJ2r5g";
+// const Bot2 = "5610536765:AAH4iZ2gqwtV1NyU9ESV_0TGHai9P5Lg1VA";
+// const Bot3 = "5746503539:AAGIQURCOkb9L6RhQxiYpeLA42OjsAeSwgU";
+
 var BOTS_DYNAMIC = [];
 
 var express = require("express");
@@ -43,13 +40,12 @@ app.get("/prueba_postman", (req, res, next) => {
  */
 function main() {
     BOTS_DYNAMIC.forEach(element => {
-        const BOT = new Telegraf(element.token);
+        const BOT = new Telegraf(element.BOT_TOKEN);
         BOT.start(ctx => ctx.reply("Bienvenidos al  Bot de nskdj!"));
 
-        console.log("element\n ", element);
         BOT.hears("hola", ctx => {
-            let applyFunction = element.functions.some(
-                element2 => element2 == "hola"
+            let applyFunction = element.BOT_FUNCTIONS.some(
+                element2 => element2.nameFunction == "hola"
             );
 
             if (applyFunction) {
@@ -60,8 +56,8 @@ function main() {
         });
 
         BOT.hears("chao", ctx => {
-            let applyFunction = element.functions.some(
-                element2 => element2 == "chao"
+            let applyFunction = element.BOT_FUNCTIONS.some(
+                element2 => element2.nameFunction == "chao"
             );
 
             if (applyFunction) {
@@ -72,8 +68,8 @@ function main() {
         });
 
         BOT.hears("jhoel", ctx => {
-            let applyFunction = element.functions.some(
-                element2 => element2 == "jhoel"
+            let applyFunction = element.BOT_FUNCTIONS.some(
+                element2 => element2.nameFunction == "jhoel"
             );
 
             if (applyFunction) {
@@ -124,48 +120,73 @@ async function connectDB() {
         });
 
         // listado de la tabla bots_functions con los join a bots y a funcions pero no me dio
-        // const botsFunctions = await BotsFunctions.findAll({
-        //     attributes: [
-        //         ["fk_id_bot", "bot"],
-        //         ["fk_id_function", "idFunction"],
-        //         ["token", "token"],
-        //     ],
-        //     raw: true,
-        //     subQuery: false,
-        // });
-        // console.log(botsFunctions);
+        const botsFunctions = await BotsFunctions.findAll({
+            attributes: [
+                ["fk_id_bot", "idBot"],
+                ["fk_id_function", "idFunction"],
+                ["nickname", "nickName"],
+                // ["token", "token"],
+                [col("function.name_function"), "nameFunction"],
+                [col("bot.token"), "token"],
+            ],
+            include: [{
+                    model: Functions,
+                    attributes: [],
+                },
+                {
+                    model: Bots,
+                    attributes: [],
+                },
+            ],
+            raw: true,
+            subQuery: false,
+        });
 
-        await setNewBotsArray(bots);
+        await setNewBotsArray(bots, botsFunctions);
     } catch (error) {
         console.log(error);
     }
 }
 
-async function setNewBotsArray(bots) {
-    // BOTS_DYNAMIC = []; // reviar si esto va o no
+async function setNewBotsArray(botsList, botsFunctionsList) {
+    var list2 = [];
 
-    // Esto no iria, agarro cada bot y le meto una lista de funciones (esto deberia venir del query)
-    bots.forEach((element, index) => {
-        Object.assign(element, { functions: BOTS_ARRAY[index].BOT_FUNCTIONS });
-        BOTS_DYNAMIC.push(element);
+    botsList.forEach(botExisted => {
+        let botComplete = {};
+        botComplete.idBot = botExisted.idBot;
+        botComplete.BOT_TOKEN = botExisted.token;
+        botComplete.BOT_FUNCTIONS = botsFunctionsList.filter(
+            element => element.idBot == botComplete.idBot
+        );
+        list2.push(botComplete);
     });
+    console.log(list2);
+
+    BOTS_DYNAMIC = []; // reviar si esto va o no
+
+    BOTS_DYNAMIC = list2;
+    // Esto no iria, agarro cada bot y le meto una lista de funciones (esto deberia venir del query)
+    // bots.forEach((element, index) => {
+    //     Object.assign(element, { functions: BOTS_ARRAY[index].BOT_FUNCTIONS });
+    //     BOTS_DYNAMIC.push(element);
+    // });
 
     // llamo a la funcion main para que actualice el nuevo listado de bots
     main();
 }
 
-// aqui deberia hacer un query para insertar un nuevo bot en la tabla, llenar sus relaciones con las funciones y luego llamar a connectDb para que lea todo otra vez y actualice el Bots_Dynamic
-async function createNewBot(newBot) {
-    Object.assign(newBot, { functions: ["hola"] }); //esto no va
+// // aqui deberia hacer un query para insertar un nuevo bot en la tabla, llenar sus relaciones con las funciones y luego llamar a connectDb para que lea todo otra vez y actualice el Bots_Dynamic
+// async function createNewBot(newBot) {
+//     Object.assign(newBot, { functions: ["hola"] }); //esto no va
 
-    /**
-     *TO DO Aqui voy a hacer un insert a bd y si es exitoso entonces llamo a connectDB(0)
-     */
+//     /**
+//      *TO DO Aqui voy a hacer un insert a bd y si es exitoso entonces llamo a connectDB(0)
+//      */
 
-    BOTS_DYNAMIC.push(newBot); //esto no va (es simulando que voy a guardar un bot en bd)
+//     BOTS_DYNAMIC.push(newBot); //esto no va (es simulando que voy a guardar un bot en bd)
 
-    connectDB();
-}
+//     connectDB();
+// }
 
 //Funcion para insertar un nuevo usuario en la tabla usuarios
 async function createNewUserDB(newBot) {
@@ -185,4 +206,4 @@ async function createNewUserDB(newBot) {
     }
 }
 
-// connectDB();
+connectDB();
