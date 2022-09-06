@@ -33,6 +33,11 @@ app.get("/createNewBot", (req, res, next) => {
     // });
 });
 
+// Api para crear un nuevo bot, recibo los parametros del req, y si son los correctos, entonces llamo a la funcion que inserta ese nuevo bot a bd
+app.get("/prueba_postman", (req, res, next) => {
+    res.json({ parametro: "Paso la prueba de postman" });
+});
+
 /**
  * Funcion que ejecuta los bots en telegram a tiempo real
  */
