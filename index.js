@@ -39,6 +39,10 @@ app.get("/prueba_postman", (req, res, next) => {
     res.json({ parametro: "Paso la prueba de postman" });
 });
 
+app.get("/update", (req, res, next) => {
+    connectDB();
+});
+
 /**
  * Funcion que ejecuta los bots en telegram a tiempo real
  */
