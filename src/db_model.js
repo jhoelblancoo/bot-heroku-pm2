@@ -38,7 +38,7 @@ const Bots = sequelize.define(
             primaryKey: true,
             autoIncrement: true,
         },
-    }, { tableName: "bots", schema: "public", timestamps: false }
+    }, { tableName: "bots_serial", schema: "public", timestamps: false }
 );
 
 /**
