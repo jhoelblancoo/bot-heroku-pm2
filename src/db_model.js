@@ -65,6 +65,7 @@ const BotsFunctions = sequelize.define(
         fk_id_bot: DataTypes.INTEGER,
         fk_id_function: DataTypes.INTEGER,
         nickname: DataTypes.STRING,
+        bool_delete: DataTypes.BOOLEAN,
     }, { tableName: "bots_functions", schema: "public", timestamps: false }
 );
 

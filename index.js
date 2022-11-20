@@ -47,7 +47,6 @@ function main() {
         const BOT = new Telegraf(element.BOT_TOKEN);
         BOT.start(ctx => ctx.reply("Bienvenidos al  Bot de nskdj!"));
         const weatherApiKey = process.env.WEATHER_API_KEY;
-        console.log(weatherApiKey);
         BOT.command('clima', (ctx) => {
             let applyFunction = element.BOT_FUNCTIONS.some(
                 element2 => element2.nameFunction == "Clima"
@@ -89,10 +88,8 @@ function main() {
                 const operacion = ctx.message.text
                     //remove spaces
                 const operacionSinEspacios = operacion.replace(/\s/g, '');
-                console.log(operacionSinEspacios);
                 //remove /calcular
                 const operacionSinComando = operacionSinEspacios.replace('/calcular', '');
-                console.log(operacionSinComando);
                 //url encode
                 const operacionUrlEncode = encodeURIComponent(operacionSinComando);
                 const url = `https://api.mathjs.org/v4/?expr=${operacionUrlEncode}`;
@@ -116,7 +113,6 @@ function main() {
             if (applyFunction) {
                 const newsApiKey = process.env.NEWS_API_KEY;
                 const noticia = ctx.message.text
-                console.log(noticia);
                 const url = `https://newsapi.org/v2/everything?q=${noticia}&apiKey=${newsApiKey}`;
 
                 axios.get(url).then((response) => {
@@ -169,7 +165,6 @@ function main() {
                 ctx.reply("Usted no posee esta funcion registrada en botly!");
             }
         });
-        console.log(BOTS_DYNAMIC);
         BOT.launch();
     });
 }
@@ -229,6 +224,9 @@ async function connectDB() {
                     attributes: [],
                 },
             ],
+            where: {
+                bool_delete: false,
+            },
             raw: true,
             subQuery: false,
         });
@@ -241,7 +239,6 @@ async function connectDB() {
 
 async function setNewBotsArray(botsList, botsFunctionsList) {
     var list2 = [];
-    console.log("Llegue");
     botsList.forEach(botExisted => {
         let botComplete = {};
         botComplete.idBot = botExisted.idBot;
@@ -263,7 +260,6 @@ async function setNewBotsArray(botsList, botsFunctionsList) {
     // });
 
     // llamo a la funcion main para que actualice el nuevo listado de bots
-    console.log(BOTS_DYNAMIC);
     main();
 }
 
