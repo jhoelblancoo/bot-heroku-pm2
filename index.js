@@ -1,6 +1,10 @@
 const { Telegraf } = require("telegraf");
+const axios = require('axios');
+const { config } = require('dotenv');
 const { User, Bots, Functions, BotsFunctions } = require("./src/db_model.js");
 const { col } = require("sequelize");
+config();
+
 
 // const Bot1 = "5469474008:AAHsNkCs06eI2-fxsxbBSRzf-7KLWtJ2r5g";
 // const Bot2 = "5610536765:AAH4iZ2gqwtV1NyU9ESV_0TGHai9P5Lg1VA";
@@ -42,7 +46,94 @@ function main() {
     BOTS_DYNAMIC.forEach(element => {
         const BOT = new Telegraf(element.BOT_TOKEN);
         BOT.start(ctx => ctx.reply("Bienvenidos al  Bot de nskdj!"));
+        const weatherApiKey = process.env.WEATHER_API_KEY;
+        console.log(weatherApiKey);
+        BOT.command('clima', (ctx) => {
+            let applyFunction = element.BOT_FUNCTIONS.some(
+                element2 => element2.nameFunction == "Clima"
+            );
+            if (applyFunction) {
+                const ciudad = ctx.message.text
+                const ciudadLimpia = ciudad.replace('/clima ', '')
+                const url = `http://api.weatherstack.com/current?access_key=${weatherApiKey}&query=${ciudadLimpia}&units=m`;
+                axios.get(url).then((response) => {
+                    const data = response.data;
+                    const { current, location } = data;
+                    const weatherStatus = current.weather_descriptions[0];
 
+                    ctx.reply(
+                        `🌆 Ciudad:${location.name}\n-\n 🌡 Temperatura ${
+                current.temperature
+              }°\n-\n❓ Clima: ${
+                (weatherStatus.toLowerCase().includes("clear") === true && "☀️") ||
+                (weatherStatus.toLowerCase().includes("sunny") === true && "☀️") ||
+                (weatherStatus.toLowerCase().includes("cloud") === true && "☁️") ||
+                (weatherStatus.toLowerCase().includes("overcast") === true && "☁️") ||
+                (weatherStatus.toLowerCase().includes("rain") === true && "🌧") ||
+                (weatherStatus.toLowerCase().includes("snow") === true && "❄️")
+              } ${current.weather_descriptions[0]}`
+                    );
+                }).catch((error) => {
+                    ctx.reply('No se ha encontrado la ciudad');
+                });
+            } else {
+                ctx.reply("Usted no posee esta funcion registrada en botly!");
+            }
+        });
+
+        BOT.command('calcular', (ctx) => {
+            let applyFunction = element.BOT_FUNCTIONS.some(
+                element2 => element2.nameFunction == "Calculadora"
+            );
+            if (applyFunction) {
+                const operacion = ctx.message.text
+                    //remove spaces
+                const operacionSinEspacios = operacion.replace(/\s/g, '');
+                console.log(operacionSinEspacios);
+                //remove /calcular
+                const operacionSinComando = operacionSinEspacios.replace('/calcular', '');
+                console.log(operacionSinComando);
+                //url encode
+                const operacionUrlEncode = encodeURIComponent(operacionSinComando);
+                const url = `https://api.mathjs.org/v4/?expr=${operacionUrlEncode}`;
+                axios.get(url).then((response) => {
+                    const data = response.data;
+                    ctx.reply(
+                        `El resultado es: ${data}`
+                    );
+                }).catch((error) => {
+                    ctx.reply('No se ha encontrado la operación');
+                });
+            } else {
+                ctx.reply("Usted no posee esta funcion registrada en botly!");
+            }
+        });
+
+        BOT.command('noticias', (ctx) => {
+            let applyFunction = element.BOT_FUNCTIONS.some(
+                element2 => element2.nameFunction == "Noticias"
+            );
+            if (applyFunction) {
+                const newsApiKey = process.env.NEWS_API_KEY;
+                const noticia = ctx.message.text
+                console.log(noticia);
+                const url = `https://newsapi.org/v2/everything?q=${noticia}&apiKey=${newsApiKey}`;
+
+                axios.get(url).then((response) => {
+
+                    const data = response.data;
+                    for (let i = 0; i < 3; i++) {
+                        ctx.reply(
+                            `${data.articles[i].title} ${data.articles[i].description} ${data.articles[i].url} `
+                        );
+                    }
+                }).catch((error) => {
+                    ctx.reply('No se ha encontrado la noticia');
+                });
+            } else {
+                ctx.reply("Usted no posee esta funcion registrada en botly!");
+            }
+        });
         BOT.hears("hola", ctx => {
             let applyFunction = element.BOT_FUNCTIONS.some(
                 element2 => element2.nameFunction == "hola"
@@ -78,7 +169,7 @@ function main() {
                 ctx.reply("Usted no posee esta funcion registrada en botly!");
             }
         });
-
+        console.log(BOTS_DYNAMIC);
         BOT.launch();
     });
 }
@@ -88,6 +179,7 @@ function main() {
 // luego llamo a main() que es la que lee ese array y ejecuta los bots en el servidor
 async function connectDB() {
     try {
+        console.log("Conectando ");
         // listado de la tabla users
         const users = await User.findAll({
             attributes: [
@@ -108,7 +200,6 @@ async function connectDB() {
             raw: true,
             subQuery: false,
         });
-
         // listado de la tabla functions
         const functions = await Functions.findAll({
             attributes: [
@@ -150,7 +241,7 @@ async function connectDB() {
 
 async function setNewBotsArray(botsList, botsFunctionsList) {
     var list2 = [];
-
+    console.log("Llegue");
     botsList.forEach(botExisted => {
         let botComplete = {};
         botComplete.idBot = botExisted.idBot;
@@ -160,7 +251,7 @@ async function setNewBotsArray(botsList, botsFunctionsList) {
         );
         list2.push(botComplete);
     });
-    console.log(list2);
+    // console.log(list2);
 
     BOTS_DYNAMIC = []; // reviar si esto va o no
 
@@ -172,6 +263,7 @@ async function setNewBotsArray(botsList, botsFunctionsList) {
     // });
 
     // llamo a la funcion main para que actualice el nuevo listado de bots
+    console.log(BOTS_DYNAMIC);
     main();
 }
 
@@ -206,4 +298,4 @@ async function createNewUserDB(newBot) {
     }
 }
 
-// connectDB();
+connectDB();
