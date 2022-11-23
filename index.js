@@ -50,152 +50,157 @@ app.get("/update", (req, res, next) => {
  */
 function main() {
     console.log("ESTOY EN MAIN");
-    BOTS_DYNAMIC.forEach(element => {
-        const BOT = new Telegraf(element.BOT_TOKEN);
+    try {
+        BOTS_DYNAMIC.forEach(element => {
+            const BOT = new Telegraf(element.BOT_TOKEN);
 
-        BOT.start(ctx => ctx.reply("Bienvenidos al  Bot de nskdj!"));
-        const weatherApiKey = process.env.WEATHER_API_KEY;
-        BOT.command("clima", ctx => {
-            let applyFunction = element.BOT_FUNCTIONS.some(
-                element2 => element2.nameFunction == "Clima"
-            );
-            if (applyFunction) {
-                const ciudad = ctx.message.text;
-                const ciudadLimpia = ciudad.replace("/clima ", "");
-                const url = `http://api.weatherstack.com/current?access_key=${weatherApiKey}&query=${ciudadLimpia}&units=m`;
-                axios
-                    .get(url)
-                    .then(response => {
-                        const data = response.data;
-                        const { current, location } = data;
-                        const weatherStatus = current.weather_descriptions[0];
-
-                        ctx.reply(
-                            `🌆 Ciudad:${location.name}\n-\n 🌡 Temperatura ${
-                current.temperature
-              }°\n-\n❓ Clima: ${
-                (weatherStatus.toLowerCase().includes("clear") === true &&
-                  "☀️") ||
-                (weatherStatus.toLowerCase().includes("sunny") === true &&
-                  "☀️") ||
-                (weatherStatus.toLowerCase().includes("cloud") === true &&
-                  "☁️") ||
-                (weatherStatus.toLowerCase().includes("overcast") === true &&
-                  "☁️") ||
-                (weatherStatus.toLowerCase().includes("rain") === true &&
-                  "🌧") ||
-                (weatherStatus.toLowerCase().includes("snow") === true && "❄️")
-              } ${current.weather_descriptions[0]}`
-                        );
-                    })
-                    .catch(error => {
-                        ctx.reply("No se ha encontrado la ciudad");
-                    });
-            } else {
-                ctx.reply("Usted no posee esta funcion registrada en botly!");
-            }
-        });
-
-        BOT.command("calcular", ctx => {
-            let applyFunction = element.BOT_FUNCTIONS.some(
-                element2 => element2.nameFunction == "Calculadora"
-            );
-            if (applyFunction) {
-                const operacion = ctx.message.text;
-                //remove spaces
-                const operacionSinEspacios = operacion.replace(/\s/g, "");
-                //remove /calcular
-                const operacionSinComando = operacionSinEspacios.replace(
-                    "/calcular",
-                    ""
+            BOT.start(ctx => ctx.reply("Bienvenidos al  Bot de nskdj!"));
+            const weatherApiKey = process.env.WEATHER_API_KEY;
+            BOT.command("clima", ctx => {
+                let applyFunction = element.BOT_FUNCTIONS.some(
+                    element2 => element2.nameFunction == "Clima"
                 );
-                //url encode
-                const operacionUrlEncode = encodeURIComponent(operacionSinComando);
-                const url = `https://api.mathjs.org/v4/?expr=${operacionUrlEncode}`;
-                axios
-                    .get(url)
-                    .then(response => {
-                        const data = response.data;
-                        ctx.reply(`El resultado es: ${data}`);
-                    })
-                    .catch(error => {
-                        ctx.reply("No se ha encontrado la operación");
-                    });
-            } else {
-                ctx.reply("Usted no posee esta funcion registrada en botly!");
-            }
-        });
+                if (applyFunction) {
+                    const ciudad = ctx.message.text;
+                    const ciudadLimpia = ciudad.replace("/clima ", "");
+                    const url = `http://api.weatherstack.com/current?access_key=${weatherApiKey}&query=${ciudadLimpia}&units=m`;
+                    axios
+                        .get(url)
+                        .then(response => {
+                            const data = response.data;
+                            const { current, location } = data;
+                            const weatherStatus = current.weather_descriptions[0];
 
-        BOT.command("noticias", ctx => {
-            let applyFunction = element.BOT_FUNCTIONS.some(
-                element2 => element2.nameFunction == "Noticias"
-            );
-            if (applyFunction) {
-                const newsApiKey = process.env.NEWS_API_KEY;
-                const noticia = ctx.message.text;
-                const url = `https://newsapi.org/v2/everything?q=${noticia}&apiKey=${newsApiKey}`;
-
-                axios
-                    .get(url)
-                    .then(response => {
-                        const data = response.data;
-                        for (let i = 0; i < 3; i++) {
                             ctx.reply(
-                                `${data.articles[i].title} ${data.articles[i].description} ${data.articles[i].url} `
+                                `🌆 Ciudad:${location.name}\n-\n 🌡 Temperatura ${
+                  current.temperature
+                }°\n-\n❓ Clima: ${
+                  (weatherStatus.toLowerCase().includes("clear") === true &&
+                    "☀️") ||
+                  (weatherStatus.toLowerCase().includes("sunny") === true &&
+                    "☀️") ||
+                  (weatherStatus.toLowerCase().includes("cloud") === true &&
+                    "☁️") ||
+                  (weatherStatus.toLowerCase().includes("overcast") === true &&
+                    "☁️") ||
+                  (weatherStatus.toLowerCase().includes("rain") === true &&
+                    "🌧") ||
+                  (weatherStatus.toLowerCase().includes("snow") === true &&
+                    "❄️")
+                } ${current.weather_descriptions[0]}`
                             );
-                        }
-                    })
-                    .catch(error => {
-                        ctx.reply("No se ha encontrado la noticia");
-                    });
-            } else {
-                ctx.reply("Usted no posee esta funcion registrada en botly!");
-            }
+                        })
+                        .catch(error => {
+                            ctx.reply("No se ha encontrado la ciudad");
+                        });
+                } else {
+                    ctx.reply("Usted no posee esta funcion registrada en botly!");
+                }
+            });
+
+            BOT.command("calcular", ctx => {
+                let applyFunction = element.BOT_FUNCTIONS.some(
+                    element2 => element2.nameFunction == "Calculadora"
+                );
+                if (applyFunction) {
+                    const operacion = ctx.message.text;
+                    //remove spaces
+                    const operacionSinEspacios = operacion.replace(/\s/g, "");
+                    //remove /calcular
+                    const operacionSinComando = operacionSinEspacios.replace(
+                        "/calcular",
+                        ""
+                    );
+                    //url encode
+                    const operacionUrlEncode = encodeURIComponent(operacionSinComando);
+                    const url = `https://api.mathjs.org/v4/?expr=${operacionUrlEncode}`;
+                    axios
+                        .get(url)
+                        .then(response => {
+                            const data = response.data;
+                            ctx.reply(`El resultado es: ${data}`);
+                        })
+                        .catch(error => {
+                            ctx.reply("No se ha encontrado la operación");
+                        });
+                } else {
+                    ctx.reply("Usted no posee esta funcion registrada en botly!");
+                }
+            });
+
+            BOT.command("noticias", ctx => {
+                let applyFunction = element.BOT_FUNCTIONS.some(
+                    element2 => element2.nameFunction == "Noticias"
+                );
+                if (applyFunction) {
+                    const newsApiKey = process.env.NEWS_API_KEY;
+                    const noticia = ctx.message.text;
+                    const url = `https://newsapi.org/v2/everything?q=${noticia}&apiKey=${newsApiKey}`;
+
+                    axios
+                        .get(url)
+                        .then(response => {
+                            const data = response.data;
+                            for (let i = 0; i < 3; i++) {
+                                ctx.reply(
+                                    `${data.articles[i].title} ${data.articles[i].description} ${data.articles[i].url} `
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            ctx.reply("No se ha encontrado la noticia");
+                        });
+                } else {
+                    ctx.reply("Usted no posee esta funcion registrada en botly!");
+                }
+            });
+            BOT.hears("hola", ctx => {
+                let applyFunction = element.BOT_FUNCTIONS.some(
+                    element2 => element2.nameFunction == "hola"
+                );
+
+                if (applyFunction) {
+                    ctx.reply("Hola estimado usuario!");
+                } else {
+                    ctx.reply("Usted no posee esta funcion registrada en botly!");
+                }
+            });
+
+            BOT.hears("chao", ctx => {
+                let applyFunction = element.BOT_FUNCTIONS.some(
+                    element2 => element2.nameFunction == "chao"
+                );
+
+                if (applyFunction) {
+                    ctx.reply("chao estimado usuario!");
+                } else {
+                    ctx.reply("Usted no posee esta funcion registrada en botly!");
+                }
+            });
+
+            BOT.hears("jhoel", ctx => {
+                let applyFunction = element.BOT_FUNCTIONS.some(
+                    element2 => element2.nameFunction == "jhoel"
+                );
+
+                if (applyFunction) {
+                    ctx.reply("jhoeljhoeljhoel!");
+                } else {
+                    ctx.reply("Usted no posee esta funcion registrada en botly!");
+                }
+            });
+
+            // BOT.stop();
+            BOT.launch({ polling: { timeout: 1 } });
+            // setInterval(() => {
+            //     BOT.stop(() => {
+            //         BOT.launch({ polling: { timeout: 1 } });
+            //     });
+            // }, 3000);
         });
-        BOT.hears("hola", ctx => {
-            let applyFunction = element.BOT_FUNCTIONS.some(
-                element2 => element2.nameFunction == "hola"
-            );
-
-            if (applyFunction) {
-                ctx.reply("Hola estimado usuario!");
-            } else {
-                ctx.reply("Usted no posee esta funcion registrada en botly!");
-            }
-        });
-
-        BOT.hears("chao", ctx => {
-            let applyFunction = element.BOT_FUNCTIONS.some(
-                element2 => element2.nameFunction == "chao"
-            );
-
-            if (applyFunction) {
-                ctx.reply("chao estimado usuario!");
-            } else {
-                ctx.reply("Usted no posee esta funcion registrada en botly!");
-            }
-        });
-
-        BOT.hears("jhoel", ctx => {
-            let applyFunction = element.BOT_FUNCTIONS.some(
-                element2 => element2.nameFunction == "jhoel"
-            );
-
-            if (applyFunction) {
-                ctx.reply("jhoeljhoeljhoel!");
-            } else {
-                ctx.reply("Usted no posee esta funcion registrada en botly!");
-            }
-        });
-
-        // BOT.stop();
-        BOT.launch({ polling: { timeout: 1 } });
-        // setInterval(() => {
-        //     BOT.stop(() => {
-        //         BOT.launch({ polling: { timeout: 1 } });
-        //     });
-        // }, 3000);
-    });
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 // yo deberia de llamar esta funcion para listar todo, luego que se liste,
