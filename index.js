@@ -49,6 +49,7 @@ app.get("/update", (req, res, next) => {
  * Funcion que ejecuta los bots en telegram a tiempo real
  */
 function main() {
+    console.log("ESTOY EN MAIN");
     BOTS_DYNAMIC.forEach(element => {
         const BOT = new Telegraf(element.BOT_TOKEN);
         BOT.start(ctx => ctx.reply("Bienvenidos al  Bot de nskdj!"));
