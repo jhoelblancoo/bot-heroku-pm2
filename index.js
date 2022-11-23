@@ -53,6 +53,7 @@ function main() {
     BOTS_DYNAMIC.forEach(element => {
         const BOT = new Telegraf(element.BOT_TOKEN);
         console.log(BOT);
+
         BOT.start(ctx => ctx.reply("Bienvenidos al  Bot de nskdj!"));
         const weatherApiKey = process.env.WEATHER_API_KEY;
         BOT.command("clima", ctx => {
@@ -187,7 +188,12 @@ function main() {
                 ctx.reply("Usted no posee esta funcion registrada en botly!");
             }
         });
-        BOT.launch();
+        BOT.launch({ polling: { timeout: 1 } });
+        setInterval(() => {
+            BOT.stop(() => {
+                BOT.launch({ polling: { timeout: 1 } });
+            });
+        }, 3000);
     });
 }
 
