@@ -39,7 +39,10 @@ app.get("/prueba_postman", (req, res, next) => {
 });
 
 app.get("/update", (req, res, next) => {
+    console.log("ESTOY EN UPDATE");
     connectDB();
+    res.json("YA SE LLAMO A CONNECT");
+    return;
 });
 
 /**
@@ -191,7 +194,7 @@ function main() {
 // luego llamo a main() que es la que lee ese array y ejecuta los bots en el servidor
 async function connectDB() {
     try {
-        console.log("Conectando ESTOY DENTRO");
+        console.log("ESTOY EN CONECT");
         // listado de la tabla users
         const users = await User.findAll({
             attributes: [
