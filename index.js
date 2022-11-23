@@ -191,7 +191,7 @@ function main() {
 // luego llamo a main() que es la que lee ese array y ejecuta los bots en el servidor
 async function connectDB() {
     try {
-        console.log("Conectando ");
+        console.log("Conectando ESTOY DENTRO");
         // listado de la tabla users
         const users = await User.findAll({
             attributes: [
