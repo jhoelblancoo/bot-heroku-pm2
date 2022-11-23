@@ -187,12 +187,14 @@ function main() {
                 ctx.reply("Usted no posee esta funcion registrada en botly!");
             }
         });
+
+        BOT.stop();
         BOT.launch({ polling: { timeout: 1 } });
-        setInterval(() => {
-            BOT.stop(() => {
-                BOT.launch({ polling: { timeout: 1 } });
-            });
-        }, 3000);
+        // setInterval(() => {
+        //     BOT.stop(() => {
+        //         BOT.launch({ polling: { timeout: 1 } });
+        //     });
+        // }, 3000);
     });
 }
 
