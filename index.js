@@ -14,6 +14,8 @@ var BOTS_DYNAMIC = [];
 var express = require("express");
 var app = express();
 
+var callDB = false;
+
 /**
  * Servidor web express
  */
@@ -39,9 +41,10 @@ app.get("/prueba_postman", (req, res, next) => {
 });
 
 app.get("/update", (req, res, next) => {
-    console.log("ESTOY EN UPDATE");
+    callDB = true;
     connectDB();
     res.json("YA SE LLAMO A CONNECT");
+
     return;
 });
 
@@ -49,7 +52,6 @@ app.get("/update", (req, res, next) => {
  * Funcion que ejecuta los bots en telegram a tiempo real
  */
 function main() {
-    console.log("ESTOY EN MAIN");
     try {
         BOTS_DYNAMIC.forEach(element => {
             const BOT = new Telegraf(element.BOT_TOKEN);
@@ -190,16 +192,7 @@ function main() {
                 }
             });
 
-            // BOT.stop();
-            BOT.launch({ polling: true });
-            // setInterval(() => {
-            //     BOT.stop(() => {
-            //         BOT.launch({ polling: { timeout: 1 } });
-            //     });
-            // }, 3000);
-            // Enable graceful stop
-            process.once("SIGINT", () => BOT.stop("SIGINT"));
-            process.once("SIGTERM", () => BOT.stop("SIGTERM"));
+            BOT.launch();
         });
     } catch (error) {
         console.log("EN EL ERROR");
@@ -210,66 +203,71 @@ function main() {
 // yo deberia de llamar esta funcion para listar todo, luego que se liste,
 // llamo a la otra de llenar la variable y
 // luego llamo a main() que es la que lee ese array y ejecuta los bots en el servidor
-async function connectDB() {
+async function connectDB(isFirst) {
     try {
-        console.log("ESTOY EN CONECT");
-        // listado de la tabla users
-        const users = await User.findAll({
-            attributes: [
-                ["name", "name"],
-                ["lastname", "lastname"],
-                ["id_user", "idUser"],
-            ],
-            raw: true,
-            subQuery: false,
-        });
+        // Si actualice o es la primera vez llamo a bd, sino no
+        if (callDB == true || isFirst) {
+            // listado de la tabla users
+            const users = await User.findAll({
+                attributes: [
+                    ["name", "name"],
+                    ["lastname", "lastname"],
+                    ["id_user", "idUser"],
+                ],
+                raw: true,
+                subQuery: false,
+            });
 
-        // listado de la tabla bots
-        const bots = await Bots.findAll({
-            attributes: [
-                ["token", "token"],
-                ["id_bot", "idBot"],
-            ],
-            raw: true,
-            subQuery: false,
-        });
-        // listado de la tabla functions
-        const functions = await Functions.findAll({
-            attributes: [
-                ["name_function", "nameFunction"],
-                ["id_function", "idFunction"],
-            ],
-            raw: true,
-            subQuery: false,
-        });
+            // listado de la tabla bots
+            const bots = await Bots.findAll({
+                attributes: [
+                    ["token", "token"],
+                    ["id_bot", "idBot"],
+                ],
+                raw: true,
+                subQuery: false,
+            });
+            // listado de la tabla functions
+            const functions = await Functions.findAll({
+                attributes: [
+                    ["name_function", "nameFunction"],
+                    ["id_function", "idFunction"],
+                ],
+                raw: true,
+                subQuery: false,
+            });
 
-        // listado de la tabla bots_functions con los join a bots y a funcions pero no me dio
-        const botsFunctions = await BotsFunctions.findAll({
-            attributes: [
-                ["fk_id_bot", "idBot"],
-                ["fk_id_function", "idFunction"],
-                ["nickname", "nickName"],
-                // ["token", "token"],
-                [col("function.name_function"), "nameFunction"],
-                [col("bot.token"), "token"],
-            ],
-            include: [{
-                    model: Functions,
-                    attributes: [],
+            // listado de la tabla bots_functions con los join a bots y a funcions pero no me dio
+            const botsFunctions = await BotsFunctions.findAll({
+                attributes: [
+                    ["fk_id_bot", "idBot"],
+                    ["fk_id_function", "idFunction"],
+                    ["nickname", "nickName"],
+                    // ["token", "token"],
+                    [col("function.name_function"), "nameFunction"],
+                    [col("bot.token"), "token"],
+                ],
+                include: [{
+                        model: Functions,
+                        attributes: [],
+                    },
+                    {
+                        model: Bots,
+                        attributes: [],
+                    },
+                ],
+                where: {
+                    bool_delete: false,
                 },
-                {
-                    model: Bots,
-                    attributes: [],
-                },
-            ],
-            where: {
-                bool_delete: false,
-            },
-            raw: true,
-            subQuery: false,
-        });
+                raw: true,
+                subQuery: false,
+            });
 
-        await setNewBotsArray(bots, botsFunctions);
+            await setNewBotsArray(bots, botsFunctions);
+        }
+
+        // Vuelvo a poner en false ya que ya hice la llamada a la bd y no quiero volver a llamarla
+        callDB = false;
     } catch (error) {
         console.log(error);
     }
@@ -333,4 +331,10 @@ async function createNewUserDB(newBot) {
 }
 
 console.log("first");
-connectDB();
+
+// Le mando true para indicar que es la primera vez
+connectDB(true);
+
+setInterval(() => {
+    connectDB(false);
+}, 180000);
