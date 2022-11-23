@@ -191,7 +191,7 @@ function main() {
             });
 
             // BOT.stop();
-            BOT.launch({ polling: { timeout: 1 } });
+            BOT.launch({ polling: true });
             // setInterval(() => {
             //     BOT.stop(() => {
             //         BOT.launch({ polling: { timeout: 1 } });
