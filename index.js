@@ -323,4 +323,4 @@ async function createNewUserDB(newBot) {
 }
 
 console.log("first");
-// connectDB();
+connectDB();
