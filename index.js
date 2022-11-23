@@ -52,6 +52,7 @@ function main() {
     console.log("ESTOY EN MAIN");
     BOTS_DYNAMIC.forEach(element => {
         const BOT = new Telegraf(element.BOT_TOKEN);
+        console.log(BOT);
         BOT.start(ctx => ctx.reply("Bienvenidos al  Bot de nskdj!"));
         const weatherApiKey = process.env.WEATHER_API_KEY;
         BOT.command("clima", ctx => {
