@@ -197,8 +197,12 @@ function main() {
             //         BOT.launch({ polling: { timeout: 1 } });
             //     });
             // }, 3000);
+            // Enable graceful stop
+            process.once("SIGINT", () => BOT.stop("SIGINT"));
+            process.once("SIGTERM", () => BOT.stop("SIGTERM"));
         });
     } catch (error) {
+        console.log("EN EL ERROR");
         console.log(error);
     }
 }
