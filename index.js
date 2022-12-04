@@ -40,162 +40,138 @@ app.get("/update", (req, res, next) => {
  */
 function main() {
     try {
-        console.log("EN MAIN");
         BOTS_DYNAMIC.forEach(element => {
             try {
                 const BOT = new Telegraf(element.BOT_TOKEN);
 
-                console.log("ando aqui");
+                BOT.start(ctx => ctx.reply("Bienvenidos al bot: #" + element.idBot));
 
-                BOT.catch(nose => {
-                    console.log("EN ERROR");
-                    console.log(nose);
-                });
-
-                BOT.start(ctx => ctx.reply("Bienvenidos al  Bot de nskdj!"));
                 const weatherApiKey = process.env.WEATHER_API_KEY;
-                BOT.command("clima", ctx => {
-                    let applyFunction = element.BOT_FUNCTIONS.some(
-                        element2 => element2.nameFunction == "Clima"
-                    );
-                    if (applyFunction) {
-                        const ciudad = ctx.message.text;
-                        const ciudadLimpia = ciudad.replace("/clima ", "");
-                        const url = `http://api.weatherstack.com/current?access_key=${weatherApiKey}&query=${ciudadLimpia}&units=m`;
-                        axios
-                            .get(url)
-                            .then(response => {
-                                const data = response.data;
-                                const {
-                                    current,
-                                    location
-                                } = data;
-                                const weatherStatus = current.weather_descriptions[0];
 
+                BOT.on("text", ctx => {
+                    // Obtengo el texto de lo que introdujo el usuario
+                    let userText = ctx.message.text;
+
+                    // Busco si existe algun alias dentro de sus botsfunctions que sea igual a lo que introdujo el usuario
+                    // Tambien borro los espacios entre las palabras
+
+                    let botFunction = element.BOT_FUNCTIONS.filter(
+                        element2 =>
+                        element2.nickName.replace(/\s/g, "").toLowerCase() ===
+                        userText.replace(/\s/g, "").toLowerCase()
+                    );
+
+                    // Si existe , entonces hago un switch para ver a donde me voy
+                    if (botFunction[0]) {
+                        // Mi condicion es el valor del NOMBRE REAL DE LA FUNCTION que tiene el usuario registrado y asi veo a donde voy y le ejecuto lo que tenga
+                        switch (botFunction[0].nameFunction) {
+                            case "Calculadora":
                                 ctx.reply(
-                                    `🌆 Ciudad:${location.name}\n-\n 🌡 Temperatura ${
-                    current.temperature
-                  }°\n-\n❓ Clima: ${
-                    (weatherStatus.toLowerCase().includes("clear") === true &&
-                      "☀️") ||
-                    (weatherStatus.toLowerCase().includes("sunny") === true &&
-                      "☀️") ||
-                    (weatherStatus.toLowerCase().includes("cloud") === true &&
-                      "☁️") ||
-                    (weatherStatus.toLowerCase().includes("overcast") ===
-                      true &&
-                      "☁️") ||
-                    (weatherStatus.toLowerCase().includes("rain") === true &&
-                      "🌧") ||
-                    (weatherStatus.toLowerCase().includes("snow") === true &&
-                      "❄️")
-                  } ${current.weather_descriptions[0]}`
+                                    "Has ejecutado la funcion calculadora, dime tu operacion"
                                 );
-                            })
-                            .catch(error => {
-                                ctx.reply("No se ha encontrado la ciudad");
-                            });
-                    } else {
-                        ctx.reply("Usted no posee esta funcion registrada en botly!");
-                    }
-                });
 
-                BOT.command("calcular", ctx => {
-                    let applyFunction = element.BOT_FUNCTIONS.some(
-                        element2 => element2.nameFunction == "Calculadora"
-                    );
-                    if (applyFunction) {
-                        const operacion = ctx.message.text;
-                        //remove spaces
-                        const operacionSinEspacios = operacion.replace(/\s/g, "");
-                        //remove /calcular
-                        const operacionSinComando = operacionSinEspacios.replace(
-                            "/calcular",
-                            ""
-                        );
-                        //url encode
-                        const operacionUrlEncode = encodeURIComponent(operacionSinComando);
-                        const url = `https://api.mathjs.org/v4/?expr=${operacionUrlEncode}`;
-                        axios
-                            .get(url)
-                            .then(response => {
-                                const data = response.data;
-                                ctx.reply(`El resultado es: ${data}`);
-                            })
-                            .catch(error => {
-                                ctx.reply("No se ha encontrado la operación");
-                            });
-                    } else {
-                        ctx.reply("Usted no posee esta funcion registrada en botly!");
-                    }
-                });
+                                const operacion = ctx.message.text;
+                                //remove spaces
+                                const operacionSinEspacios = operacion.replace(/\s/g, "");
+                                //remove /calcular
+                                const operacionSinComando = operacionSinEspacios.replace(
+                                    botFunction[0].nickName,
+                                    ""
+                                );
+                                //url encode
+                                const operacionUrlEncode =
+                                    encodeURIComponent(operacionSinComando);
+                                axios
+                                    .get(`https://api.mathjs.org/v4/?expr=${operacionUrlEncode}`)
+                                    .then(response => {
+                                        const data = response.data;
+                                        ctx.reply(`El resultado es: ${data}`);
+                                    })
+                                    .catch(error => {
+                                        ctx.reply("No se ha encontrado la operación");
+                                    });
 
-                BOT.command("noticias", ctx => {
-                    let applyFunction = element.BOT_FUNCTIONS.some(
-                        element2 => element2.nameFunction == "Noticias"
-                    );
-                    if (applyFunction) {
-                        const newsApiKey = process.env.NEWS_API_KEY;
-                        const noticia = ctx.message.text;
-                        const url = `https://newsapi.org/v2/everything?q=${noticia}&apiKey=${newsApiKey}`;
+                                break;
 
-                        axios
-                            .get(url)
-                            .then(response => {
-                                const data = response.data;
-                                for (let i = 0; i < 3; i++) {
-                                    ctx.reply(
-                                        `${data.articles[i].title} ${data.articles[i].description} ${data.articles[i].url} `
-                                    );
-                                }
-                            })
-                            .catch(error => {
-                                ctx.reply("No se ha encontrado la noticia");
-                            });
-                    } else {
-                        ctx.reply("Usted no posee esta funcion registrada en botly!");
-                    }
-                });
-                BOT.hears("hola", ctx => {
-                    let applyFunction = element.BOT_FUNCTIONS.some(
-                        element2 => element2.nameFunction == "hola"
-                    );
+                            case "Noticias":
+                                const newsApiKey = process.env.NEWS_API_KEY;
+                                const noticia = ctx.message.text;
+                                const url = `https://newsapi.org/v2/everything?q=${noticia}&apiKey=${newsApiKey}`;
 
-                    if (applyFunction) {
-                        ctx.reply("Hola estimado usuario!");
-                    } else {
-                        ctx.reply("Usted no posee esta funcion registrada en botly!");
-                    }
-                });
+                                axios
+                                    .get(url)
+                                    .then(response => {
+                                        const data = response.data;
+                                        for (let i = 0; i < 3; i++) {
+                                            ctx.reply(
+                                                `${data.articles[i].title} ${data.articles[i].description} ${data.articles[i].url} `
+                                            );
+                                        }
+                                    })
+                                    .catch(error => {
+                                        ctx.reply("No se ha encontrado la noticia");
+                                    });
 
-                BOT.hears("chao", ctx => {
-                    let applyFunction = element.BOT_FUNCTIONS.some(
-                        element2 => element2.nameFunction == "chao"
-                    );
+                                break;
 
-                    if (applyFunction) {
-                        ctx.reply("chao estimado usuario!");
-                    } else {
-                        ctx.reply("Usted no posee esta funcion registrada en botly!");
-                    }
-                });
+                            case "Clima":
+                                const ciudad = ctx.message.text;
+                                const ciudadLimpia = ciudad.replace(
+                                    botFunction[0].nickName,
+                                    ""
+                                );
 
-                BOT.hears("jhoel", ctx => {
-                    let applyFunction = element.BOT_FUNCTIONS.some(
-                        element2 => element2.nameFunction == "jhoel"
-                    );
+                                axios
+                                    .get(
+                                        `http://api.weatherstack.com/current?access_key=${weatherApiKey}&query=${ciudadLimpia}&units=m`
+                                    )
+                                    .then(response => {
+                                        const data = response.data;
+                                        const {
+                                            current,
+                                            location
+                                        } = data;
+                                        const weatherStatus = current.weather_descriptions[0];
 
-                    if (applyFunction) {
-                        ctx.reply("jhoeljhoeljhoel!");
+                                        ctx.reply(
+                                            `🌆 Ciudad:${location.name}\n-\n 🌡 Temperatura ${
+                        current.temperature
+                      }°\n-\n❓ Clima: ${
+                        (weatherStatus.toLowerCase().includes("clear") ===
+                          true &&
+                          "☀️") ||
+                        (weatherStatus.toLowerCase().includes("sunny") ===
+                          true &&
+                          "☀️") ||
+                        (weatherStatus.toLowerCase().includes("cloud") ===
+                          true &&
+                          "☁️") ||
+                        (weatherStatus.toLowerCase().includes("overcast") ===
+                          true &&
+                          "☁️") ||
+                        (weatherStatus.toLowerCase().includes("rain") ===
+                          true &&
+                          "🌧") ||
+                        (weatherStatus.toLowerCase().includes("snow") ===
+                          true &&
+                          "❄️")
+                      } ${current.weather_descriptions[0]}`
+                                        );
+                                    })
+                                    .catch(error => {
+                                        ctx.reply("No se ha encontrado la ciudad");
+                                    });
+                                break;
+
+                            default:
+                                break;
+                        }
                     } else {
                         ctx.reply("Usted no posee esta funcion registrada en botly!");
                     }
                 });
 
                 BOT.launch();
-                // Enable graceful stop
-                process.once("SIGINT", () => BOT.stop("SIGINT"));
-                process.once("SIGTERM", () => BOT.stop("SIGTERM"));
             } catch (error) {
                 console.log("EN ERROR CAPAZ");
             }
@@ -282,7 +258,6 @@ async function setNewBotsArray(botsList, botsFunctionsList) {
         );
         list2.push(botComplete);
     });
-    // console.log(list2);
 
     BOTS_DYNAMIC = []; // reviar si esto va o no
 
@@ -291,23 +266,5 @@ async function setNewBotsArray(botsList, botsFunctionsList) {
     main();
 }
 
-//Funcion para insertar un nuevo usuario en la tabla usuarios
-async function createNewUserDB(newBot) {
-    try {
-        // query para insertar un nuevo row en la tabla users_serial
-        await User.create({
-            name: "Pablo",
-            lastname: "Gavi",
-        });
-
-        console.log("\n ahora llamo a la bd para leer\n");
-
-        // llamo a la funcion que lista lo que este en bd y empieza el flujo
-        await connectDB();
-    } catch (error) {
-        console.log("error al crear el bicho en bd");
-    }
-}
-
-// Le mando true para indicar que es la primera vez
+// Me conecto a la BD y luego ejecuto la funcion main
 connectDB();

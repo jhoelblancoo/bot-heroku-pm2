@@ -1,12 +1,16 @@
-const { Sequelize, Model, DataTypes } = require("sequelize");
+const {
+    Sequelize,
+    Model,
+    DataTypes
+} = require("sequelize");
 
 // variable sequelize con la inicializacion de las credenciales de la bd de heroku
 const sequelize = new Sequelize({
-    database: "d45uis4euhf5ut",
-    username: "yrneaunylhohcp",
-    password: "7d8c51321d2d9845683b53f6e96483e075333c2e3e49e5ce3b3993e1c91ef8c2",
-    host: "ec2-54-208-104-27.compute-1.amazonaws.com",
-    port: 5432,
+    database: "railway",
+    username: "postgres",
+    password: "exukD6qNji8cs1AqeS8d",
+    host: "containers-us-west-112.railway.app",
+    port: 6356,
     dialect: "postgres",
     dialectOptions: {
         ssl: {
@@ -23,8 +27,16 @@ const User = sequelize.define(
     "users_serial", {
         name: DataTypes.STRING,
         lastname: DataTypes.STRING,
-        id_user: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    }, { tableName: "users_serial", schema: "public", timestamps: false }
+        id_user: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+    }, {
+        tableName: "users_serial",
+        schema: "public",
+        timestamps: false
+    }
 );
 
 /**
@@ -38,7 +50,11 @@ const Bots = sequelize.define(
             primaryKey: true,
             autoIncrement: true,
         },
-    }, { tableName: "bots_serial", schema: "public", timestamps: false }
+    }, {
+        tableName: "bots_serial",
+        schema: "public",
+        timestamps: false
+    }
 );
 
 /**
@@ -52,7 +68,11 @@ const Functions = sequelize.define(
             primaryKey: true,
             autoIncrement: true,
         },
-    }, { tableName: "functions", schema: "public", timestamps: false }
+    }, {
+        tableName: "functions",
+        schema: "public",
+        timestamps: false
+    }
 );
 
 /**
@@ -66,7 +86,11 @@ const BotsFunctions = sequelize.define(
         fk_id_function: DataTypes.INTEGER,
         nickname: DataTypes.STRING,
         bool_delete: DataTypes.BOOLEAN,
-    }, { tableName: "bots_functions", schema: "public", timestamps: false }
+    }, {
+        tableName: "bots_functions",
+        schema: "public",
+        timestamps: false
+    }
 );
 
 BotsFunctions.belongsTo(Functions, {
@@ -78,7 +102,17 @@ Functions.hasMany(BotsFunctions, {
     foreignKey: "fk_id_function",
 });
 
-BotsFunctions.belongsTo(Bots, { foreignKey: "fk_id_bot", sourceKey: "id_bot" });
-Bots.hasMany(BotsFunctions, { foreignKey: "fk_id_bot" });
+BotsFunctions.belongsTo(Bots, {
+    foreignKey: "fk_id_bot",
+    sourceKey: "id_bot"
+});
+Bots.hasMany(BotsFunctions, {
+    foreignKey: "fk_id_bot"
+});
 
-module.exports = { User, Bots, Functions, BotsFunctions };
+module.exports = {
+    User,
+    Bots,
+    Functions,
+    BotsFunctions
+};
