@@ -30,7 +30,7 @@ app.listen(process.env.PORT || 3000, () => {
 });
 
 app.get("/update", (req, res, next) => {
-    // connectDB(false);
+    connectDB(false);
     res.json("YA SE LLAMO A CONNECT");
 
     return;
