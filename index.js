@@ -54,6 +54,8 @@ function main(isFirst) {
                 BOT.hears(/[A-za-z0–9_]/, ctx => {
                     BOT.context.bot = element.BOT_FUNCTIONS;
 
+                    console.log(element.BOT_FUNCTIONS);
+
                     // Obtengo el texto de lo que introdujo el usuario
                     let userText = ctx.message.text;
 
@@ -177,9 +179,9 @@ function main(isFirst) {
                     }
                 });
 
-                if (isFirst) {
-                    BOT.launch();
-                }
+                // if (isFirst) {
+                BOT.launch();
+                // }
             } catch (error) {
                 console.log("EN ERROR CAPAZ");
             }
