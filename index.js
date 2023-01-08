@@ -283,4 +283,4 @@ async function setNewBotsArray(botsList, botsFunctionsList, isFirst) {
 }
 
 // Me conecto a la BD y luego ejecuto la funcion main
-// connectDB(true);
+connectDB(true);
