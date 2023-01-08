@@ -1,5 +1,6 @@
 const {
-    Telegraf
+    Telegraf,
+    Context
 } = require("telegraf");
 const axios = require("axios");
 const {
@@ -29,7 +30,7 @@ app.listen(process.env.PORT || 3000, () => {
 });
 
 app.get("/update", (req, res, next) => {
-    connectDB();
+    connectDB(false);
     res.json("YA SE LLAMO A CONNECT");
 
     return;
@@ -38,17 +39,21 @@ app.get("/update", (req, res, next) => {
 /**
  * Funcion que ejecuta los bots en telegram a tiempo real
  */
-function main() {
+function main(isFirst) {
     try {
         BOTS_DYNAMIC.forEach(element => {
             try {
-                const BOT = new Telegraf(element.BOT_TOKEN);
+                const BOT = new Telegraf(element.BOT_TOKEN).catch(err => {
+                    console.log("Ooops", err);
+                });
 
                 BOT.start(ctx => ctx.reply("Bienvenidos al bot: #" + element.idBot));
 
                 const weatherApiKey = process.env.WEATHER_API_KEY;
 
-                BOT.on("text", ctx => {
+                BOT.hears(/[A-za-z0–9_]/, ctx => {
+                    BOT.context.bot = element.BOT_FUNCTIONS;
+
                     // Obtengo el texto de lo que introdujo el usuario
                     let userText = ctx.message.text;
 
@@ -62,7 +67,8 @@ function main() {
                     );
 
                     // Si existe , entonces hago un switch para ver a donde me voy
-                    if (botFunction[0]) {
+
+                    if (botFunction.length > 0 && botFunction[0]) {
                         // Mi condicion es el valor del NOMBRE REAL DE LA FUNCTION que tiene el usuario registrado y asi veo a donde voy y le ejecuto lo que tenga
                         switch (botFunction[0].nameFunction) {
                             case "Calculadora":
@@ -171,7 +177,9 @@ function main() {
                     }
                 });
 
-                BOT.launch();
+                if (isFirst) {
+                    BOT.launch();
+                }
             } catch (error) {
                 console.log("EN ERROR CAPAZ");
             }
@@ -204,6 +212,9 @@ async function connectDB(isFirst) {
                 ["token", "token"],
                 ["id_bot", "idBot"],
             ],
+            where: {
+                bool_delete: false,
+            },
             raw: true,
             subQuery: false,
         });
@@ -213,6 +224,9 @@ async function connectDB(isFirst) {
                 ["name_function", "nameFunction"],
                 ["id_function", "idFunction"],
             ],
+            where: {
+                bool_delete: false,
+            },
             raw: true,
             subQuery: false,
         });
@@ -241,13 +255,13 @@ async function connectDB(isFirst) {
             subQuery: false,
         });
 
-        await setNewBotsArray(bots, botsFunctions);
+        await setNewBotsArray(bots, botsFunctions, isFirst);
     } catch (error) {
         console.log(error);
     }
 }
 
-async function setNewBotsArray(botsList, botsFunctionsList) {
+async function setNewBotsArray(botsList, botsFunctionsList, isFirst) {
     var list2 = [];
     botsList.forEach(botExisted => {
         let botComplete = {};
@@ -263,8 +277,8 @@ async function setNewBotsArray(botsList, botsFunctionsList) {
 
     BOTS_DYNAMIC = list2;
 
-    main();
+    main(isFirst);
 }
 
 // Me conecto a la BD y luego ejecuto la funcion main
-connectDB();
+connectDB(true);

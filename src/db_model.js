@@ -8,7 +8,7 @@ const {
 const sequelize = new Sequelize({
     database: "railway",
     username: "postgres",
-    password: "exukD6qNji8cs1AqeS8d",
+    password: "lP0yzOPe6KkBIftpBbwm",
     host: "containers-us-west-112.railway.app",
     port: 6356,
     dialect: "postgres",
@@ -30,12 +30,12 @@ const User = sequelize.define(
         id_user: {
             type: DataTypes.INTEGER,
             primaryKey: true,
-            autoIncrement: true
+            autoIncrement: true,
         },
     }, {
         tableName: "users_serial",
         schema: "public",
-        timestamps: false
+        timestamps: false,
     }
 );
 
@@ -53,7 +53,7 @@ const Bots = sequelize.define(
     }, {
         tableName: "bots_serial",
         schema: "public",
-        timestamps: false
+        timestamps: false,
     }
 );
 
@@ -71,7 +71,7 @@ const Functions = sequelize.define(
     }, {
         tableName: "functions",
         schema: "public",
-        timestamps: false
+        timestamps: false,
     }
 );
 
@@ -89,7 +89,7 @@ const BotsFunctions = sequelize.define(
     }, {
         tableName: "bots_functions",
         schema: "public",
-        timestamps: false
+        timestamps: false,
     }
 );
 
@@ -104,15 +104,15 @@ Functions.hasMany(BotsFunctions, {
 
 BotsFunctions.belongsTo(Bots, {
     foreignKey: "fk_id_bot",
-    sourceKey: "id_bot"
+    sourceKey: "id_bot",
 });
 Bots.hasMany(BotsFunctions, {
-    foreignKey: "fk_id_bot"
+    foreignKey: "fk_id_bot",
 });
 
 module.exports = {
     User,
     Bots,
     Functions,
-    BotsFunctions
+    BotsFunctions,
 };
