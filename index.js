@@ -22,6 +22,8 @@ var BOTS_DYNAMIC = [];
 var express = require("express");
 var app = express();
 
+global.chupalo = {};
+
 /**
  * Servidor web express
  */
@@ -51,10 +53,10 @@ function main(isFirst) {
 
                 const weatherApiKey = process.env.WEATHER_API_KEY;
 
-                BOT.hears(/[A-za-z0–9_]/, ctx => {
-                    BOT.context.bot = element.BOT_FUNCTIONS;
-
-                    console.log(element.BOT_FUNCTIONS);
+                global.chupalo[element.idBot] = element;
+                // BOT.hears(/[A-za-z0–9_]/, ctx => {
+                BOT.on("text", ctx => {
+                    BOT.context.bot = global.chupalo[element.idBot].BOT_FUNCTIONS;
 
                     // Obtengo el texto de lo que introdujo el usuario
                     let userText = ctx.message.text;
@@ -62,14 +64,13 @@ function main(isFirst) {
                     // Busco si existe algun alias dentro de sus botsfunctions que sea igual a lo que introdujo el usuario
                     // Tambien borro los espacios entre las palabras
 
-                    let botFunction = element.BOT_FUNCTIONS.filter(
+                    let botFunction = global.chupalo[element.idBot].BOT_FUNCTIONS.filter(
                         element2 =>
                         element2.nickName.replace(/\s/g, "").toLowerCase() ===
                         userText.replace(/\s/g, "").toLowerCase()
                     );
 
                     // Si existe , entonces hago un switch para ver a donde me voy
-
                     if (botFunction.length > 0 && botFunction[0]) {
                         // Mi condicion es el valor del NOMBRE REAL DE LA FUNCTION que tiene el usuario registrado y asi veo a donde voy y le ejecuto lo que tenga
                         switch (botFunction[0].nameFunction) {
@@ -179,9 +180,9 @@ function main(isFirst) {
                     }
                 });
 
-                // if (isFirst) {
-                BOT.launch();
-                // }
+                if (isFirst) {
+                    BOT.launch();
+                }
             } catch (error) {
                 console.log("EN ERROR CAPAZ");
             }
