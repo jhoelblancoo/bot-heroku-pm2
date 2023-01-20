@@ -22,7 +22,7 @@ var BOTS_DYNAMIC = [];
 var express = require("express");
 var app = express();
 
-global.chupalo = {};
+global.botInstance = {};
 
 /**
  * Servidor web express
@@ -53,10 +53,10 @@ function main(isFirst) {
 
                 const weatherApiKey = process.env.WEATHER_API_KEY;
 
-                global.chupalo[element.idBot] = element;
+                global.botInstance[element.idBot] = element;
                 // BOT.hears(/[A-za-z0–9_]/, ctx => {
                 BOT.on("text", ctx => {
-                    BOT.context.bot = global.chupalo[element.idBot].BOT_FUNCTIONS;
+                    BOT.context.bot = global.botInstance[element.idBot].BOT_FUNCTIONS;
 
                     // Obtengo el texto de lo que introdujo el usuario
                     let userText = ctx.message.text;
@@ -64,7 +64,9 @@ function main(isFirst) {
                     // Busco si existe algun alias dentro de sus botsfunctions que sea igual a lo que introdujo el usuario
                     // Tambien borro los espacios entre las palabras
 
-                    let botFunction = global.chupalo[element.idBot].BOT_FUNCTIONS.filter(
+                    let botFunction = global.botInstance[
+                        element.idBot
+                    ].BOT_FUNCTIONS.filter(
                         element2 =>
                         element2.nickName.replace(/\s/g, "").toLowerCase() ===
                         userText.replace(/\s/g, "").toLowerCase()
