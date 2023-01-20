@@ -24,6 +24,8 @@ var app = express();
 
 global.botInstance = {};
 
+global.numberIterations = 0;
+
 /**
  * Servidor web express
  */
@@ -182,7 +184,8 @@ function main(isFirst) {
                     }
                 });
 
-                if (isFirst) {
+                if (isFirst && global.numberIterations == 1) {
+                    global.numberIterations += 1;
                     BOT.launch();
                 }
             } catch (error) {
