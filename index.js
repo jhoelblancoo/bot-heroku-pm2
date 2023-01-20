@@ -184,7 +184,7 @@ function main(isFirst) {
                     }
                 });
 
-                if (isFirst && global.numberIterations == 1) {
+                if (isFirst && global.numberIterations == 0) {
                     global.numberIterations += 1;
                     BOT.launch();
                 }
