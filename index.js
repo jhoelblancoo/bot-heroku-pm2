@@ -93,6 +93,11 @@ function main(isFirst) {
                     // Si el bot que escribe NO EXISTE, detengo el bot, si existe dejo que se ejecute
                     if (global.botInstance[element.idBot] == undefined) {
                         BOT.stop("");
+                    }
+
+                    // SI el bot esta inactivo no puede ejecutar ninguna de sus funciones aunque las tenga
+                    else if (+global.botInstance[element.idBot].idStatus == 2) {
+                        ctx.reply("Este bot se encuentra inactivo.");
                     } else {
                         BOT.context.bot = global.botInstance[element.idBot].BOT_FUNCTIONS;
 
@@ -266,6 +271,7 @@ async function connectDB(isFirst) {
                 ["token", "token"],
                 ["id_bot", "idBot"],
                 ["bool_delete", "boolDelete"],
+                ["fk_id_status", "idStatus"],
             ],
             where: {
                 bool_delete: false,
@@ -322,6 +328,7 @@ async function setNewBotsArray(botsList, botsFunctionsList, isFirst) {
         let botComplete = {};
         botComplete.idBot = botExisted.idBot;
         botComplete.boolDelete = botExisted.boolDelete;
+        botComplete.idStatus = botExisted.idStatus;
         botComplete.BOT_TOKEN = botExisted.token;
         botComplete.BOT_FUNCTIONS = botsFunctionsList.filter(
             element => element.idBot == botComplete.idBot
