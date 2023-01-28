@@ -25,12 +25,39 @@ const sequelize = new Sequelize({
  */
 const User = sequelize.define(
     "users_serial", {
-        name: DataTypes.STRING,
-        lastname: DataTypes.STRING,
         id_user: {
-            type: DataTypes.INTEGER,
+            type: Sequelize.INTEGER,
             primaryKey: true,
             autoIncrement: true,
+        },
+        name: {
+            type: Sequelize.STRING,
+        },
+        lastname: {
+            type: Sequelize.STRING,
+        },
+        email: {
+            type: Sequelize.STRING,
+        },
+        phone_number: {
+            type: Sequelize.STRING,
+        },
+        username: {
+            type: Sequelize.STRING,
+        },
+        password: {
+            type: Sequelize.STRING,
+        },
+        created_date: {
+            type: Sequelize.DATE,
+            defaultValue: Sequelize.NOW,
+        },
+        bool_delete: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: false,
+        },
+        photo: {
+            type: Sequelize.STRING,
         },
     }, {
         tableName: "users_serial",
@@ -108,6 +135,12 @@ BotsFunctions.belongsTo(Bots, {
 });
 Bots.hasMany(BotsFunctions, {
     foreignKey: "fk_id_bot",
+});
+
+//Foreign Key de user
+Bots.belongsTo(User, {
+    foreignKey: "fk_id_user",
+    sourceKey: "id_user",
 });
 
 module.exports = {

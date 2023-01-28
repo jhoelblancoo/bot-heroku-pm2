@@ -95,8 +95,11 @@ function main(isFirst) {
                         BOT.stop("");
                     }
 
-                    // SI el bot esta inactivo no puede ejecutar ninguna de sus funciones aunque las tenga
-                    else if (+global.botInstance[element.idBot].idStatus == 2) {
+                    // SI el bot esta INACTIVO, o el usario INACTIVO O ELIMINADO no puede ejecutar ninguna de sus funciones aunque las tenga
+                    else if (+global.botInstance[element.idBot].idStatus == 2 ||
+                        +global.botInstance[element.idBot].idUserStatus == 5 ||
+                        +global.botInstance[element.idBot].idUserStatus == 6
+                    ) {
                         ctx.reply("Este bot se encuentra inactivo.");
                     } else {
                         BOT.context.bot = global.botInstance[element.idBot].BOT_FUNCTIONS;
@@ -254,17 +257,6 @@ function main(isFirst) {
 // luego llamo a main() que es la que lee ese array y ejecuta los bots en el servidor
 async function connectDB(isFirst) {
     try {
-        // listado de la tabla users
-        const users = await User.findAll({
-            attributes: [
-                ["name", "name"],
-                ["lastname", "lastname"],
-                ["id_user", "idUser"],
-            ],
-            raw: true,
-            subQuery: false,
-        });
-
         // listado de la tabla bots
         const bots = await Bots.findAll({
             attributes: [
@@ -272,19 +264,13 @@ async function connectDB(isFirst) {
                 ["id_bot", "idBot"],
                 ["bool_delete", "boolDelete"],
                 ["fk_id_status", "idStatus"],
+                ["fk_id_user", "idUser"],
+                [col("users_serial.fk_id_status"), "idUserStatus"],
             ],
-            where: {
-                bool_delete: false,
-            },
-            raw: true,
-            subQuery: false,
-        });
-        // listado de la tabla functions
-        const functions = await Functions.findAll({
-            attributes: [
-                ["name_function", "nameFunction"],
-                ["id_function", "idFunction"],
-            ],
+            include: [{
+                model: User,
+                attributes: [],
+            }, ],
             where: {
                 bool_delete: false,
             },
@@ -329,6 +315,7 @@ async function setNewBotsArray(botsList, botsFunctionsList, isFirst) {
         botComplete.idBot = botExisted.idBot;
         botComplete.boolDelete = botExisted.boolDelete;
         botComplete.idStatus = botExisted.idStatus;
+        botComplete.idUserStatus = botExisted.idUserStatus;
         botComplete.BOT_TOKEN = botExisted.token;
         botComplete.BOT_FUNCTIONS = botsFunctionsList.filter(
             element => element.idBot == botComplete.idBot
