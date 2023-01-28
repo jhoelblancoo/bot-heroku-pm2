@@ -1,12 +1,12 @@
 {
     "name": "bot_heroku_pm2",
-    "version": "1.0.11",
+    "version": "1.0.12",
     "description": "",
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "pm2-runtime start ecosystem.config.js --env production",
-        "dev": "node index.js"
+        "dev": "nodemon index.js"
     },
     "author": "",
     "license": "ISC",

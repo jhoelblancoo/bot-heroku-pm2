@@ -45,6 +45,23 @@ app.get("/update", (req, res, next) => {
  */
 function main(isFirst) {
     try {
+        // TODO ESTO ES PARA CUANDO ELIMINE UN BOT, SE ACTUALICE TAMBIEN LA VARIABLE GLOBAL
+        let a = [];
+        for (const [key] of Object.entries(global.botInstance)) {
+            a.push(String(key));
+        }
+
+        let b = [];
+        BOTS_DYNAMIC.forEach(element => {
+            b.push(String(element.idBot));
+        });
+
+        a.forEach(element => {
+            if (b.includes(element)) {} else {
+                delete global.botInstance[element];
+            }
+        });
+
         BOTS_DYNAMIC.forEach(element => {
             try {
                 const BOT = new Telegraf(element.BOT_TOKEN).catch(err => {
@@ -55,138 +72,167 @@ function main(isFirst) {
 
                 const weatherApiKey = process.env.WEATHER_API_KEY;
 
+                if (isFirst) {
+                    element.isLaunch = false;
+                } else {
+                    if (global.botInstance[element.idBot] == undefined) {
+                        global.botInstance[element.idBot] = element;
+                        Object.assign(global.botInstance[element.idBot], {
+                            isLaunch: false,
+                        });
+                        global.botInstance[element.idBot].isLaunch = false;
+                    }
+                }
+
+                // Con esto le digo a la variable global que cree un nuevo element (bot) y que es su primera iteracion
                 global.botInstance[element.idBot] = element;
+                global.botInstance[element.idBot].numberIterations = 0;
+
                 // BOT.hears(/[A-za-z0–9_]/, ctx => {
                 BOT.on("text", ctx => {
-                    BOT.context.bot = global.botInstance[element.idBot].BOT_FUNCTIONS;
-
-                    // Obtengo el texto de lo que introdujo el usuario
-                    let userText = ctx.message.text;
-
-                    // Busco si existe algun alias dentro de sus botsfunctions que sea igual a lo que introdujo el usuario
-                    // Tambien borro los espacios entre las palabras
-
-                    let botFunction = global.botInstance[
-                        element.idBot
-                    ].BOT_FUNCTIONS.filter(
-                        element2 =>
-                        element2.nickName.replace(/\s/g, "").toLowerCase() ===
-                        userText.replace(/\s/g, "").toLowerCase()
-                    );
-
-                    // Si existe , entonces hago un switch para ver a donde me voy
-                    if (botFunction.length > 0 && botFunction[0]) {
-                        // Mi condicion es el valor del NOMBRE REAL DE LA FUNCTION que tiene el usuario registrado y asi veo a donde voy y le ejecuto lo que tenga
-                        switch (botFunction[0].nameFunction) {
-                            case "Calculadora":
-                                ctx.reply(
-                                    "Has ejecutado la funcion calculadora, dime tu operacion"
-                                );
-
-                                const operacion = ctx.message.text;
-                                //remove spaces
-                                const operacionSinEspacios = operacion.replace(/\s/g, "");
-                                //remove /calcular
-                                const operacionSinComando = operacionSinEspacios.replace(
-                                    botFunction[0].nickName,
-                                    ""
-                                );
-                                //url encode
-                                const operacionUrlEncode =
-                                    encodeURIComponent(operacionSinComando);
-                                axios
-                                    .get(`https://api.mathjs.org/v4/?expr=${operacionUrlEncode}`)
-                                    .then(response => {
-                                        const data = response.data;
-                                        ctx.reply(`El resultado es: ${data}`);
-                                    })
-                                    .catch(error => {
-                                        ctx.reply("No se ha encontrado la operación");
-                                    });
-
-                                break;
-
-                            case "Noticias":
-                                const newsApiKey = process.env.NEWS_API_KEY;
-                                const noticia = ctx.message.text;
-                                const url = `https://newsapi.org/v2/everything?q=${noticia}&apiKey=${newsApiKey}`;
-
-                                axios
-                                    .get(url)
-                                    .then(response => {
-                                        const data = response.data;
-                                        for (let i = 0; i < 3; i++) {
-                                            ctx.reply(
-                                                `${data.articles[i].title} ${data.articles[i].description} ${data.articles[i].url} `
-                                            );
-                                        }
-                                    })
-                                    .catch(error => {
-                                        ctx.reply("No se ha encontrado la noticia");
-                                    });
-
-                                break;
-
-                            case "Clima":
-                                const ciudad = ctx.message.text;
-                                const ciudadLimpia = ciudad.replace(
-                                    botFunction[0].nickName,
-                                    ""
-                                );
-
-                                axios
-                                    .get(
-                                        `http://api.weatherstack.com/current?access_key=${weatherApiKey}&query=${ciudadLimpia}&units=m`
-                                    )
-                                    .then(response => {
-                                        const data = response.data;
-                                        const {
-                                            current,
-                                            location
-                                        } = data;
-                                        const weatherStatus = current.weather_descriptions[0];
-
-                                        ctx.reply(
-                                            `🌆 Ciudad:${location.name}\n-\n 🌡 Temperatura ${
-                        current.temperature
-                      }°\n-\n❓ Clima: ${
-                        (weatherStatus.toLowerCase().includes("clear") ===
-                          true &&
-                          "☀️") ||
-                        (weatherStatus.toLowerCase().includes("sunny") ===
-                          true &&
-                          "☀️") ||
-                        (weatherStatus.toLowerCase().includes("cloud") ===
-                          true &&
-                          "☁️") ||
-                        (weatherStatus.toLowerCase().includes("overcast") ===
-                          true &&
-                          "☁️") ||
-                        (weatherStatus.toLowerCase().includes("rain") ===
-                          true &&
-                          "🌧") ||
-                        (weatherStatus.toLowerCase().includes("snow") ===
-                          true &&
-                          "❄️")
-                      } ${current.weather_descriptions[0]}`
-                                        );
-                                    })
-                                    .catch(error => {
-                                        ctx.reply("No se ha encontrado la ciudad");
-                                    });
-                                break;
-
-                            default:
-                                break;
-                        }
+                    // Si el bot que escribe NO EXISTE, detengo el bot, si existe dejo que se ejecute
+                    if (global.botInstance[element.idBot] == undefined) {
+                        BOT.stop("");
                     } else {
-                        ctx.reply("Usted no posee esta funcion registrada en botly!");
+                        BOT.context.bot = global.botInstance[element.idBot].BOT_FUNCTIONS;
+
+                        // Obtengo el texto de lo que introdujo el usuario
+                        let userText = ctx.message.text;
+
+                        // Busco si existe algun alias dentro de sus botsfunctions que sea igual a lo que introdujo el usuario
+                        // Tambien borro los espacios entre las palabras
+
+                        let botFunction = global.botInstance[
+                            element.idBot
+                        ].BOT_FUNCTIONS.filter(
+                            element2 =>
+                            element2.nickName.replace(/\s/g, "").toLowerCase() ===
+                            userText.replace(/\s/g, "").toLowerCase()
+                        );
+
+                        // Si existe , entonces hago un switch para ver a donde me voy
+                        if (botFunction.length > 0 && botFunction[0]) {
+                            // Mi condicion es el valor del NOMBRE REAL DE LA FUNCTION que tiene el usuario registrado y asi veo a donde voy y le ejecuto lo que tenga
+                            switch (botFunction[0].nameFunction) {
+                                case "Calculadora":
+                                    ctx.reply(
+                                        "Has ejecutado la funcion calculadora, dime tu operacion"
+                                    );
+
+                                    const operacion = ctx.message.text;
+                                    //remove spaces
+                                    const operacionSinEspacios = operacion.replace(/\s/g, "");
+                                    //remove /calcular
+                                    const operacionSinComando = operacionSinEspacios.replace(
+                                        botFunction[0].nickName,
+                                        ""
+                                    );
+                                    //url encode
+                                    const operacionUrlEncode =
+                                        encodeURIComponent(operacionSinComando);
+                                    axios
+                                        .get(
+                                            `https://api.mathjs.org/v4/?expr=${operacionUrlEncode}`
+                                        )
+                                        .then(response => {
+                                            const data = response.data;
+                                            ctx.reply(`El resultado es: ${data}`);
+                                        })
+                                        .catch(error => {
+                                            ctx.reply("No se ha encontrado la operación");
+                                        });
+
+                                    break;
+
+                                case "Noticias":
+                                    const newsApiKey = process.env.NEWS_API_KEY;
+                                    const noticia = ctx.message.text;
+                                    const url = `https://newsapi.org/v2/everything?q=${noticia}&apiKey=${newsApiKey}`;
+
+                                    axios
+                                        .get(url)
+                                        .then(response => {
+                                            const data = response.data;
+                                            for (let i = 0; i < 3; i++) {
+                                                ctx.reply(
+                                                    `${data.articles[i].title} ${data.articles[i].description} ${data.articles[i].url} `
+                                                );
+                                            }
+                                        })
+                                        .catch(error => {
+                                            ctx.reply("No se ha encontrado la noticia");
+                                        });
+
+                                    break;
+
+                                case "Clima":
+                                    const ciudad = ctx.message.text;
+                                    const ciudadLimpia = ciudad.replace(
+                                        botFunction[0].nickName,
+                                        ""
+                                    );
+
+                                    axios
+                                        .get(
+                                            `http://api.weatherstack.com/current?access_key=${weatherApiKey}&query=${ciudadLimpia}&units=m`
+                                        )
+                                        .then(response => {
+                                            const data = response.data;
+                                            const {
+                                                current,
+                                                location
+                                            } = data;
+                                            const weatherStatus = current.weather_descriptions[0];
+
+                                            ctx.reply(
+                                                `🌆 Ciudad:${location.name}\n-\n 🌡 Temperatura ${
+                          current.temperature
+                        }°\n-\n❓ Clima: ${
+                          (weatherStatus.toLowerCase().includes("clear") ===
+                            true &&
+                            "☀️") ||
+                          (weatherStatus.toLowerCase().includes("sunny") ===
+                            true &&
+                            "☀️") ||
+                          (weatherStatus.toLowerCase().includes("cloud") ===
+                            true &&
+                            "☁️") ||
+                          (weatherStatus.toLowerCase().includes("overcast") ===
+                            true &&
+                            "☁️") ||
+                          (weatherStatus.toLowerCase().includes("rain") ===
+                            true &&
+                            "🌧") ||
+                          (weatherStatus.toLowerCase().includes("snow") ===
+                            true &&
+                            "❄️")
+                        } ${current.weather_descriptions[0]}`
+                                            );
+                                        })
+                                        .catch(error => {
+                                            ctx.reply("No se ha encontrado la ciudad");
+                                        });
+                                    break;
+
+                                default:
+                                    break;
+                            }
+                        } else {
+                            ctx.reply("Usted no posee esta funcion registrada en botly!");
+                        }
                     }
                 });
 
-                if (isFirst && global.numberIterations == 0) {
-                    global.numberIterations += 1;
+                // SOLO ejecuto el bot si primera vez, y si su numero de iteraciones es 0, O si es un nuevo bot y su numero de iteraciones tambein es 0
+                if (
+                    (isFirst &&
+                        global.botInstance[element.idBot].numberIterations == 0) ||
+                    (global.botInstance[element.idBot].numberIterations == 0 &&
+                        global.botInstance[element.idBot].isLaunch == false)
+                ) {
                     BOT.launch();
+                    global.botInstance[element.idBot].numberIterations += 1;
+                    global.botInstance[element.idBot].isLaunch = true;
                 }
             } catch (error) {
                 console.log("EN ERROR CAPAZ");
@@ -219,6 +265,7 @@ async function connectDB(isFirst) {
             attributes: [
                 ["token", "token"],
                 ["id_bot", "idBot"],
+                ["bool_delete", "boolDelete"],
             ],
             where: {
                 bool_delete: false,
@@ -274,6 +321,7 @@ async function setNewBotsArray(botsList, botsFunctionsList, isFirst) {
     botsList.forEach(botExisted => {
         let botComplete = {};
         botComplete.idBot = botExisted.idBot;
+        botComplete.boolDelete = botExisted.boolDelete;
         botComplete.BOT_TOKEN = botExisted.token;
         botComplete.BOT_FUNCTIONS = botsFunctionsList.filter(
             element => element.idBot == botComplete.idBot
