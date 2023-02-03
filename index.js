@@ -31,7 +31,9 @@ global.numberIterations = 0;
  * Servidor web express
  */
 app.listen(process.env.PORT || 3000, () => {
-    console.log("Server running on port 3000");
+    console.log(
+        "\n\nBotly-Telegram is online! on port=" + process.env.PORT + "\n\n"
+    );
 });
 
 app.get("/update", (req, res, next) => {
@@ -76,9 +78,9 @@ function main(isFirst) {
                         "Te saludamos desde el equipo de Botly 👋🏼👨🏻‍💻 \n\n" +
                         `Bienvenido al bot: 🤖${element.nickname}🤖\n\n` +
                         "\u{1F4E2} Síguenos en nuestras redes sociales: \n\n" +
-                        "   📲Instagram: @botly_ve\n\n" +
-                        "   📲Twitter: @Botly_ve\n\n" +
-                        "   💻Página web: https://f-botly.netlify.app/\n\n"
+                        `   📲Instagram: ${process.env.BOTLY_INSTAGRAM}\n\n` +
+                        `   📲Twitter: ${process.env.BOTLY_TWITTER}\n\n` +
+                        `   💻Página web: ${process.env.BOTLY_WEB_PAGE}\n\n`
                     );
                     ctx.reply(
                         "🚨 Puedes controlarme enviando estos comandos: \n\n" +
@@ -131,7 +133,7 @@ function main(isFirst) {
                         "/start -    👋🏼 Bienvenida al bot\n\n" +
                         "/info -    ℹ️ Información sobre el bot\n\n" +
                         "/funciones -  🤖 Funciones del bot\n\n" +
-                        "💻❔Puedes consultar nuestras preguntas frecuentes ingresando a la página web de Botly:\nhttps://f-botly.netlify.app/faqs"
+                        `💻❔Puedes consultar nuestras preguntas frecuentes ingresando a la página web de Botly:\n${process.env.BOTLY_WEB_PAGE_FAQ}`
                     );
                 });
 
