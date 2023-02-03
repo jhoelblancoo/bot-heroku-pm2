@@ -77,6 +77,7 @@ const Bots = sequelize.define(
             primaryKey: true,
             autoIncrement: true,
         },
+        nickname: DataTypes.STRING,
     }, {
         tableName: "bots_serial",
         schema: "public",
@@ -120,6 +121,29 @@ const BotsFunctions = sequelize.define(
     }
 );
 
+/**
+ * Modelo tabla cat_status
+ */
+const CatStatus = sequelize.define(
+    "cat_status", {
+        id_cat_status: {
+            type: Sequelize.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
+        },
+        name: {
+            type: Sequelize.STRING,
+        },
+        description: {
+            type: Sequelize.STRING,
+        },
+    }, {
+        tableName: "cat_status",
+        schema: "public",
+        timestamps: false,
+    }
+);
+
 BotsFunctions.belongsTo(Functions, {
     foreignKey: "fk_id_function",
     sourceKey: "id_function",
@@ -143,9 +167,16 @@ Bots.belongsTo(User, {
     sourceKey: "id_user",
 });
 
+//Foreign Key de Cat_status
+Bots.belongsTo(CatStatus, {
+    foreignKey: "fk_id_status",
+    sourceKey: "id_cat_status",
+});
+
 module.exports = {
     User,
     Bots,
     Functions,
     BotsFunctions,
+    CatStatus,
 };

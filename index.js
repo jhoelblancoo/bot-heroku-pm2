@@ -10,7 +10,8 @@ const {
     User,
     Bots,
     Functions,
-    BotsFunctions
+    BotsFunctions,
+    CatStatus,
 } = require("./src/db_model.js");
 const {
     col
@@ -68,7 +69,71 @@ function main(isFirst) {
                     console.log("Ooops", err);
                 });
 
-                BOT.start(ctx => ctx.reply("Bienvenidos al bot: #" + element.idBot));
+                // Bienvenida del bot
+                BOT.start(ctx => {
+                    ctx.reply(
+                        `¡Hola😁 @${element.username}!\n\n` +
+                        "Te saludamos desde el equipo de Botly 👋🏼👨🏻‍💻 \n\n" +
+                        `Bienvenido al bot: 🤖${element.nickname}🤖\n\n` +
+                        "\u{1F4E2} Síguenos en nuestras redes sociales: \n\n" +
+                        "   📲Instagram: @botly_ve\n\n" +
+                        "   📲Twitter: @Botly_ve\n\n" +
+                        "   💻Página web: https://f-botly.netlify.app/\n\n"
+                    );
+                    ctx.reply(
+                        "🚨 Puedes controlarme enviando estos comandos: \n\n" +
+                        "/start -    👋🏼 Bienvenida al bot\n\n" +
+                        "/info -    ℹ️ Información sobre el bot\n\n" +
+                        "/funciones -  🤖 Funciones del bot\n\n" +
+                        "/help -    ❔ Preguntas frecuentes\n\n"
+                    );
+                });
+
+                // Informacion del bot
+                BOT.command("info", ctx => {
+                    ctx.reply(
+                        "🤖 Información del bot 🤖\n\n" +
+                        `   🆔 Alias: ${element.nickname}\n\n` +
+                        `   ${element.idStatus == 1 ? "✅" : "⚠️"} Estatus del bot: ${
+                element.statusName
+              }\n\n` +
+                        `   📅 Fecha de creación: ${element.createDate}\n\n` +
+                        `   👤 Usuario: ${element.username}\n\n` +
+                        `   📝 Funciones: /funciones\n\n`
+                    );
+                });
+
+                // Funciones del bot
+                BOT.command("funciones", ctx => {
+                    // element.BOT_FUNCTIONS = [];
+                    if (element.BOT_FUNCTIONS.length > 0) {
+                        let funciones = [];
+                        element.BOT_FUNCTIONS.forEach(funcion => {
+                            funciones.push(
+                                `       ✅ ${funcion.nickName} - (${funcion.nameFunction}) \n\n`
+                            );
+                        });
+                        ctx.reply(
+                            "🎁 Estas son las funcioness que me has agregado 🎁\n\n" +
+                            funciones.join("") +
+                            "⚠️ RECORDATORIO: PARA EJECUTAR UNA FUNCIÓN DEBES ESCRIBIR EXCLUSIVAMENTE EL ALIAS.⚠️\n\n" +
+                            `📌Ejemplo: \n\Para ejecutar la funcion ${element.BOT_FUNCTIONS[0].nameFunction}, debes escribir: ${element.BOT_FUNCTIONS[0].nickName}\n\n`
+                        );
+                    } else {
+                        ctx.reply("⚠️ Este bot no tiene funciones agregadas ⚠️\n\n");
+                    }
+                });
+
+                // Ayuda del bot
+                BOT.command("help", ctx => {
+                    ctx.reply(
+                        "🚨 Puedes controlarme enviando estos comandos: \n\n" +
+                        "/start -    👋🏼 Bienvenida al bot\n\n" +
+                        "/info -    ℹ️ Información sobre el bot\n\n" +
+                        "/funciones -  🤖 Funciones del bot\n\n" +
+                        "💻❔Puedes consultar nuestras preguntas frecuentes ingresando a la página web de Botly:\nhttps://f-botly.netlify.app/faqs"
+                    );
+                });
 
                 const weatherApiKey = process.env.WEATHER_API_KEY;
 
@@ -264,11 +329,18 @@ async function connectDB(isFirst) {
                 ["id_bot", "idBot"],
                 ["bool_delete", "boolDelete"],
                 ["fk_id_status", "idStatus"],
+                ["nickname", "nickname"],
                 ["fk_id_user", "idUser"],
+                ["create_date", "createDate"],
                 [col("users_serial.fk_id_status"), "idUserStatus"],
+                [col("users_serial.username"), "username"],
+                [col("cat_status.name"), "statusName"],
             ],
             include: [{
                 model: User,
+                attributes: [],
+            }, {
+                model: CatStatus,
                 attributes: [],
             }, ],
             where: {
@@ -311,11 +383,21 @@ async function connectDB(isFirst) {
 async function setNewBotsArray(botsList, botsFunctionsList, isFirst) {
     var list2 = [];
     botsList.forEach(botExisted => {
+        // Convierto la fecha a formato venezuela
+        let date = new Date(botExisted.createDate);
+        date =
+            date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear();
+
         let botComplete = {};
         botComplete.idBot = botExisted.idBot;
         botComplete.boolDelete = botExisted.boolDelete;
         botComplete.idStatus = botExisted.idStatus;
         botComplete.idUserStatus = botExisted.idUserStatus;
+        botComplete.username = botExisted.username;
+        botComplete.nickname = botExisted.nickname;
+        botComplete.statusName = botExisted.statusName;
+        botComplete.createDate = date;
+
         botComplete.BOT_TOKEN = botExisted.token;
         botComplete.BOT_FUNCTIONS = botsFunctionsList.filter(
             element => element.idBot == botComplete.idBot
