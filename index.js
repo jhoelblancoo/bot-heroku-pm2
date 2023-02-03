@@ -84,76 +84,71 @@ function main(isFirst) {
         global.botInstance[element.idBot].numberIterations = 0;
 
         // Si el bot existe y tiene estatus activo, entonces sus comandos responden
-        if (
-          +global.botInstance[element.idBot] &&
-          +global.botInstance[element.idBot].idStatus == 1
-        ) {
-          // Bienvenida del bot
-          BOT.start(ctx => {
-            ctx.reply(
-              `¡Hola😁 @${element.username}!\n\n` +
-                "Te saludamos desde el equipo de Botly 👋🏼👨🏻‍💻 \n\n" +
-                `Bienvenido al bot: 🤖${element.nickname}🤖\n\n` +
-                "\u{1F4E2} Síguenos en nuestras redes sociales: \n\n" +
-                `   📲Instagram: ${process.env.BOTLY_INSTAGRAM}\n\n` +
-                `   📲Twitter: ${process.env.BOTLY_TWITTER}\n\n` +
-                `   💻Página web: ${process.env.BOTLY_WEB_PAGE}\n\n`
-            );
-            ctx.reply(
-              "🚨 Puedes controlarme enviando estos comandos: \n\n" +
-                "/start -    👋🏼 Bienvenida al bot\n\n" +
-                "/info -    ℹ️ Información sobre el bot\n\n" +
-                "/funciones -  🤖 Funciones del bot\n\n" +
-                "/help -    ❔ Preguntas frecuentes\n\n"
-            );
-          });
+        // Bienvenida del bot
+        BOT.start(ctx => {
+          ctx.reply(
+            `¡Hola😁 @${element.username}!\n\n` +
+              "Te saludamos desde el equipo de Botly 👋🏼👨🏻‍💻 \n\n" +
+              `Bienvenido al bot: 🤖${element.nickname}🤖\n\n` +
+              "\u{1F4E2} Síguenos en nuestras redes sociales: \n\n" +
+              `   📲Instagram: ${process.env.BOTLY_INSTAGRAM}\n\n` +
+              `   📲Twitter: ${process.env.BOTLY_TWITTER}\n\n` +
+              `   💻Página web: ${process.env.BOTLY_WEB_PAGE}\n\n`
+          );
+          ctx.reply(
+            "🚨 Puedes controlarme enviando estos comandos: \n\n" +
+              "/start -    👋🏼 Bienvenida al bot\n\n" +
+              "/info -    ℹ️ Información sobre el bot\n\n" +
+              "/funciones -  🤖 Funciones del bot\n\n" +
+              "/help -    ❔ Preguntas frecuentes\n\n"
+          );
+        });
 
-          // Informacion del bot
-          BOT.command("info", ctx => {
-            ctx.reply(
-              "🤖 Información del bot 🤖\n\n" +
-                `   🆔 Alias: ${element.nickname}\n\n` +
-                `   ${element.idStatus == 1 ? "✅" : "⚠️"} Estatus del bot: ${
-                  element.statusName
-                }\n\n` +
-                `   📅 Fecha de creación: ${element.createDate}\n\n` +
-                `   👤 Usuario: ${element.username}\n\n` +
-                `   📝 Funciones: /funciones\n\n`
-            );
-          });
+        // Informacion del bot
+        BOT.command("info", ctx => {
+          ctx.reply(
+            "🤖 Información del bot 🤖\n\n" +
+              `   🆔 Alias: ${element.nickname}\n\n` +
+              `   ${element.idStatus == 1 ? "✅" : "⚠️"} Estatus del bot: ${
+                element.statusName
+              }\n\n` +
+              `   📅 Fecha de creación: ${element.createDate}\n\n` +
+              `   👤 Usuario: ${element.username}\n\n` +
+              `   📝 Funciones: /funciones\n\n`
+          );
+        });
 
-          // Funciones del bot
-          BOT.command("funciones", ctx => {
-            // element.BOT_FUNCTIONS = [];
-            if (element.BOT_FUNCTIONS.length > 0) {
-              let funciones = [];
-              element.BOT_FUNCTIONS.forEach(funcion => {
-                funciones.push(
-                  `       ✅ ${funcion.nickName} - (${funcion.nameFunction}) \n\n`
-                );
-              });
-              ctx.reply(
-                "🎁 Estas son las funcioness que me has agregado 🎁\n\n" +
-                  funciones.join("") +
-                  "⚠️ RECORDATORIO: PARA EJECUTAR UNA FUNCIÓN DEBES ESCRIBIR EXCLUSIVAMENTE EL ALIAS.⚠️\n\n" +
-                  `📌Ejemplo: \n\Para ejecutar la funcion ${element.BOT_FUNCTIONS[0].nameFunction}, debes escribir: ${element.BOT_FUNCTIONS[0].nickName}\n\n`
+        // Funciones del bot
+        BOT.command("funciones", ctx => {
+          // element.BOT_FUNCTIONS = [];
+          if (element.BOT_FUNCTIONS.length > 0) {
+            let funciones = [];
+            element.BOT_FUNCTIONS.forEach(funcion => {
+              funciones.push(
+                `       ✅ ${funcion.nickName} - (${funcion.nameFunction}) \n\n`
               );
-            } else {
-              ctx.reply("⚠️ Este bot no tiene funciones agregadas ⚠️\n\n");
-            }
-          });
-
-          // Ayuda del bot
-          BOT.command("help", ctx => {
+            });
             ctx.reply(
-              "🚨 Puedes controlarme enviando estos comandos: \n\n" +
-                "/start -    👋🏼 Bienvenida al bot\n\n" +
-                "/info -    ℹ️ Información sobre el bot\n\n" +
-                "/funciones -  🤖 Funciones del bot\n\n" +
-                `💻❔Puedes consultar nuestras preguntas frecuentes ingresando a la página web de Botly:\n${process.env.BOTLY_WEB_PAGE_FAQ}`
+              "🎁 Estas son las funcioness que me has agregado 🎁\n\n" +
+                funciones.join("") +
+                "⚠️ RECORDATORIO: PARA EJECUTAR UNA FUNCIÓN DEBES ESCRIBIR EXCLUSIVAMENTE EL ALIAS.⚠️\n\n" +
+                `📌Ejemplo: \n\Para ejecutar la funcion ${element.BOT_FUNCTIONS[0].nameFunction}, debes escribir: ${element.BOT_FUNCTIONS[0].nickName}\n\n`
             );
-          });
-        }
+          } else {
+            ctx.reply("⚠️ Este bot no tiene funciones agregadas ⚠️\n\n");
+          }
+        });
+
+        // Ayuda del bot
+        BOT.command("help", ctx => {
+          ctx.reply(
+            "🚨 Puedes controlarme enviando estos comandos: \n\n" +
+              "/start -    👋🏼 Bienvenida al bot\n\n" +
+              "/info -    ℹ️ Información sobre el bot\n\n" +
+              "/funciones -  🤖 Funciones del bot\n\n" +
+              `💻❔Puedes consultar nuestras preguntas frecuentes ingresando a la página web de Botly:\n${process.env.BOTLY_WEB_PAGE_FAQ}`
+          );
+        });
 
         // BOT.hears(/[A-za-z0–9_]/, ctx => {
         BOT.on("text", ctx => {
