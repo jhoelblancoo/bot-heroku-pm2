@@ -87,33 +87,61 @@ function main(isFirst) {
         // Bienvenida del bot
         BOT.start(ctx => {
           ctx.reply(
-            `¡Hola😁 @${element.username}!\n\n` +
+            `¡Hola😁 @${global.botInstance[element.idBot].username}!\n\n` +
               "Te saludamos desde el equipo de Botly 👋🏼👨🏻‍💻 \n\n" +
-              `Bienvenido al bot: 🤖${element.nickname}🤖\n\n` +
+              `Bienvenido al bot: 🤖${
+                global.botInstance[element.idBot].nickname
+              }🤖\n\n` +
               "\u{1F4E2} Síguenos en nuestras redes sociales: \n\n" +
               `   📲Instagram: ${process.env.BOTLY_INSTAGRAM}\n\n` +
               `   📲Twitter: ${process.env.BOTLY_TWITTER}\n\n` +
               `   💻Página web: ${process.env.BOTLY_WEB_PAGE}\n\n`
           );
-          ctx.reply(
-            "🚨 Puedes controlarme enviando estos comandos: \n\n" +
-              "/start -    👋🏼 Bienvenida al bot\n\n" +
-              "/info -    ℹ️ Información sobre el bot\n\n" +
-              "/funciones -  🤖 Funciones del bot\n\n" +
-              "/help -    ❔ Preguntas frecuentes\n\n"
-          );
+
+          // Si el bot esta activo le muestro los comandos
+          if (global.botInstance[element.idBot].idStatus == 1) {
+            ctx.reply(
+              "🚨 Puedes controlarme enviando estos comandos: \n\n" +
+                "/start -    👋🏼 Bienvenida al bot\n\n" +
+                "/info -    ℹ️ Información sobre el bot\n\n" +
+                "/funciones -  🤖 Funciones del bot\n\n" +
+                "/help -    ❔ Preguntas frecuentes\n\n"
+            );
+          } else {
+            // Bot esta inactivo
+            ctx.reply(
+              "🤖 Información del bot 🤖\n\n" +
+                `   🆔 Alias: ${
+                  global.botInstance[element.idBot].nickname
+                }\n\n` +
+                `   ${
+                  global.botInstance[element.idBot].idStatus == 2 ? "⚠️" : "🚫"
+                } Estatus del bot: ${
+                  global.botInstance[element.idBot].statusName
+                }\n\n` +
+                `   👤 Usuario: ${
+                  global.botInstance[element.idBot].username
+                }\n\n`
+            );
+          }
         });
 
         // Informacion del bot
         BOT.command("info", ctx => {
           ctx.reply(
             "🤖 Información del bot 🤖\n\n" +
-              `   🆔 Alias: ${element.nickname}\n\n` +
-              `   ${element.idStatus == 1 ? "✅" : "⚠️"} Estatus del bot: ${
-                element.statusName
+              `   🆔 Alias: ${global.botInstance[element.idBot].nickname}\n\n` +
+              `   ${
+                global.botInstance[element.idBot].idStatus == 1 ? "✅" : "⚠️"
+              } Estatus del bot: ${
+                global.botInstance[element.idBot].statusName
               }\n\n` +
-              `   📅 Fecha de creación: ${element.createDate}\n\n` +
-              `   👤 Usuario: ${element.username}\n\n` +
+              `   📅 Fecha de creación: ${
+                global.botInstance[element.idBot].createDate
+              }\n\n` +
+              `   👤 Usuario: ${
+                global.botInstance[element.idBot].username
+              }\n\n` +
               `   📝 Funciones: /funciones\n\n`
           );
         });
@@ -121,9 +149,9 @@ function main(isFirst) {
         // Funciones del bot
         BOT.command("funciones", ctx => {
           // element.BOT_FUNCTIONS = [];
-          if (element.BOT_FUNCTIONS.length > 0) {
+          if (global.botInstance[element.idBot].BOT_FUNCTIONS.length > 0) {
             let funciones = [];
-            element.BOT_FUNCTIONS.forEach(funcion => {
+            global.botInstance[element.idBot].BOT_FUNCTIONS.forEach(funcion => {
               funciones.push(
                 `       ✅ ${funcion.nickName} - (${funcion.nameFunction}) \n\n`
               );
@@ -132,7 +160,10 @@ function main(isFirst) {
               "🎁 Estas son las funcioness que me has agregado 🎁\n\n" +
                 funciones.join("") +
                 "⚠️ RECORDATORIO: PARA EJECUTAR UNA FUNCIÓN DEBES ESCRIBIR EXCLUSIVAMENTE EL ALIAS.⚠️\n\n" +
-                `📌Ejemplo: \n\Para ejecutar la funcion ${element.BOT_FUNCTIONS[0].nameFunction}, debes escribir: ${element.BOT_FUNCTIONS[0].nickName}\n\n`
+                `📌Ejemplo: \n\Para ejecutar la funcion ${
+                  global.botInstance[element.idBot].BOT_FUNCTIONS[0]
+                    .nameFunction
+                }, debes escribir: ${element.BOT_FUNCTIONS[0].nickName}\n\n`
             );
           } else {
             ctx.reply("⚠️ Este bot no tiene funciones agregadas ⚠️\n\n");
