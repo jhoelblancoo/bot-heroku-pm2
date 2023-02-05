@@ -210,44 +210,96 @@ function main(isFirst) {
             // Busco si existe algun alias dentro de sus botsfunctions que sea igual a lo que introdujo el usuario
             // Tambien borro los espacios entre las palabras
 
-            let botFunction = global.botInstance[
+            // global.botInstance[element.idBot].BOT_FUNCTIONS.forEach(funn => {
+            //   console.log(userText);
+            //   console.log(userText.includes(funn.nickName));
+            //   console.log(funn.nickName);
+
+            //   // if (
+            //   //   funn.nickName
+            //   //     .replace(/\s/g, "")
+            //   //     .toLowerCase()
+            //   //     .includes(userText.replace(/\s/g, "").toLowerCase())
+            //   // ) {
+            //   //   console.log(funn);
+            //   // } else {
+            //   //   console.log(funn.nickName.replace(/\s/g, "").toLowerCase());
+            //   // }
+            // });
+
+            // let botFunction = global.botInstance[
+            //   element.idBot
+            // ].BOT_FUNCTIONS.filter(
+            //   element2 =>
+            //     element2.nickName.replace(/\s/g, "").toLowerCase() ===
+            //     userText.replace(/\s/g, "").toLowerCase()
+            // );
+
+            /**
+             * NUEVOOO
+             */
+
+            // Esta es la funcion que corresponde a lo que escribe el usuario
+            const botFunction = global.botInstance[
               element.idBot
-            ].BOT_FUNCTIONS.filter(
-              element2 =>
-                element2.nickName.replace(/\s/g, "").toLowerCase() ===
-                userText.replace(/\s/g, "").toLowerCase()
+            ].BOT_FUNCTIONS.find(element =>
+              userText
+                .replace(/\s/g, "")
+                .toLowerCase()
+                .includes(element.nickName.replace(/\s/g, "").toLowerCase())
             );
 
+            // Esta variable es lo que el usuario quiere consultar 2+2 o caracas etc
+            let userContent;
+
+            if (botFunction) {
+              userContent = userText
+                .replace(/\s/g, "")
+                .toLowerCase()
+                .split(botFunction.nickName);
+            }
+
             // Si existe , entonces hago un switch para ver a donde me voy
-            if (botFunction.length > 0 && botFunction[0]) {
+            if (botFunction) {
               // Mi condicion es el valor del NOMBRE REAL DE LA FUNCTION que tiene el usuario registrado y asi veo a donde voy y le ejecuto lo que tenga
-              switch (botFunction[0].nameFunction) {
+              switch (botFunction.nameFunction) {
                 case "Calculadora":
-                  ctx.reply(
-                    "Has ejecutado la funcion calculadora, dime tu operacion"
+                  // ctx.reply(
+                  //   "Has ejecutado la funcion calculadora, dime tu operacion"
+                  // );
+
+                  // const operacion = ctx.message.text;
+                  // //remove spaces
+                  // const operacionSinEspacios = operacion.replace(/\s/g, "");
+                  // //remove /calcular
+                  // const operacionSinComando = operacionSinEspacios.replace(
+                  //   botFunction.nickName,
+                  //   ""
+                  // );
+
+                  // Extraigo la operacion del mensaje del usuario
+                  let operacion = userContent[1];
+
+                  //url encode
+                  const operacionUrlEncode = encodeURIComponent(
+                    operacion ? operacion : "abc"
                   );
 
-                  const operacion = ctx.message.text;
-                  //remove spaces
-                  const operacionSinEspacios = operacion.replace(/\s/g, "");
-                  //remove /calcular
-                  const operacionSinComando = operacionSinEspacios.replace(
-                    botFunction[0].nickName,
-                    ""
-                  );
-                  //url encode
-                  const operacionUrlEncode =
-                    encodeURIComponent(operacionSinComando);
+                  ctx.reply(`⏳ Consultando la operación: ${operacion} ⏳`);
+
                   axios
                     .get(
                       `https://api.mathjs.org/v4/?expr=${operacionUrlEncode}`
                     )
                     .then(response => {
                       const data = response.data;
-                      ctx.reply(`El resultado es: ${data}`);
+
+                      ctx.reply(`🧮 El resultado es: ${data}`);
                     })
                     .catch(error => {
-                      ctx.reply("No se ha encontrado la operación");
+                      ctx.reply(
+                        `❌ No se ha encontrado la operación: ${operacion}. ❌`
+                      );
                     });
 
                   break;
@@ -274,15 +326,16 @@ function main(isFirst) {
                   break;
 
                 case "Clima":
-                  const ciudad = ctx.message.text;
-                  const ciudadLimpia = ciudad.replace(
-                    botFunction[0].nickName,
-                    ""
+                  // Extraemos la ciudad del mensaje del usuario
+                  const cityRequest = userContent[1];
+
+                  ctx.reply(
+                    `⏳ Consultando clima para la ciudad: ${cityRequest} ⏳`
                   );
 
                   axios
                     .get(
-                      `http://api.weatherstack.com/current?access_key=${weatherApiKey}&query=${ciudadLimpia}&units=m`
+                      `http://api.weatherstack.com/current?access_key=${weatherApiKey}&query=${cityRequest}&units=m`
                     )
                     .then(response => {
                       const data = response.data;
@@ -315,7 +368,9 @@ function main(isFirst) {
                       );
                     })
                     .catch(error => {
-                      ctx.reply("No se ha encontrado la ciudad");
+                      ctx.reply(
+                        `❌ No se ha encontrado la ciudad: ${cityRequest} ❌`
+                      );
                     });
                   break;
 
