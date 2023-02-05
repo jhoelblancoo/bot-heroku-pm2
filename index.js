@@ -166,7 +166,10 @@ function main(isFirst) {
                 }, debes escribir: ${element.BOT_FUNCTIONS[0].nickName}\n\n`
             );
           } else {
-            ctx.reply("⚠️ Este bot no tiene funciones agregadas ⚠️\n\n");
+            ctx.reply(
+              "⚠️ Este bot no posee ninguna función ⚠️\n\n" +
+                `Recuerda que puedes añadirle funciones a tus bots desde la sección Tienda, ingresando a la página web de Botly:\n${process.env.BOTLY_WEB_PAGE_SHOP}`
+            );
           }
         });
 
@@ -194,7 +197,10 @@ function main(isFirst) {
             +global.botInstance[element.idBot].idUserStatus == 5 ||
             +global.botInstance[element.idBot].idUserStatus == 6
           ) {
-            ctx.reply("Este bot se encuentra inactivo.");
+            ctx.reply(
+              "⛔ Este bot se encuentra inactivo, por lo tanto no podrás ejecutar ninguna de tus funciones. ⛔\n\n" +
+                `Recuerda que puedes activar tus bots desde la sección Mis Bots, ingresando a la página web de Botly:\n${process.env.BOTLY_WEB_PAGE_BOTS}`
+            );
           } else {
             BOT.context.bot = global.botInstance[element.idBot].BOT_FUNCTIONS;
 
