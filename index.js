@@ -305,23 +305,27 @@ function main(isFirst) {
 
                   break;
 
-                case "Noticias":
+                case "Noticias populares":
                   const newsApiKey = process.env.NEWS_API_KEY;
                   const noticia = ctx.message.text;
-                  const url = `https://newsapi.org/v2/everything?q=${noticia}&apiKey=${newsApiKey}`;
+                  const url = `https://newsapi.org/v2/everything?q=${noticia}&apiKey=${newsApiKey}&language=es&sortBy=popularity`;
 
+                  ctx.reply(`⏳ Consultando noticias populares (español): ⏳`);
                   axios
                     .get(url)
                     .then(response => {
                       const data = response.data;
-                      for (let i = 0; i < 3; i++) {
+
+                      for (let i = 0; i < 5; i++) {
                         ctx.reply(
                           `${data.articles[i].title} ${data.articles[i].description} ${data.articles[i].url} `
                         );
                       }
                     })
                     .catch(error => {
-                      ctx.reply("No se ha encontrado la noticia");
+                      ctx.reply(
+                        `❌ No se han encontrado resultados para noticias. ❌`
+                      );
                     });
 
                   break;
