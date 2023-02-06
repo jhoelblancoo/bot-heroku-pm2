@@ -1,6 +1,6 @@
 {
   "name": "bot_heroku_pm2",
-  "version": "1.0.23",
+  "version": "1.0.24",
   "description": "",
   "main": "index.js",
   "scripts": {

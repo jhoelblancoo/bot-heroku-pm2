@@ -148,14 +148,18 @@ function main(isFirst) {
 
         // Funciones del bot
         BOT.command("funciones", ctx => {
+          console.log(global.botInstance[element.idBot]);
+          console.log(global.botInstance[element.idBot].BOT_FUNCTIONS);
           // element.BOT_FUNCTIONS = [];
           if (global.botInstance[element.idBot].BOT_FUNCTIONS.length > 0) {
+            console.log("tiene funciones");
             let funciones = [];
             global.botInstance[element.idBot].BOT_FUNCTIONS.forEach(funcion => {
               funciones.push(
                 `       ✅ ${funcion.nickName} - (${funcion.nameFunction}) \n\n`
               );
             });
+            console.log("hago el reply 1");
             ctx.reply(
               "🎁 Estas son las funcioness que me has agregado 🎁\n\n" +
                 funciones.join("") +
@@ -165,11 +169,15 @@ function main(isFirst) {
                     .nameFunction
                 }, debes escribir: ${element.BOT_FUNCTIONS[0].nickName}\n\n`
             );
+            console.log("termino el reply 2");
           } else {
+            console.log("NO tiene funciones");
+            console.log("hago el reply 3");
             ctx.reply(
               "⚠️ Este bot no posee ninguna función ⚠️\n\n" +
                 `Recuerda que puedes añadirle funciones a tus bots desde la sección Tienda, ingresando a la página web de Botly:\n${process.env.BOTLY_WEB_PAGE_SHOP}`
             );
+            console.log("termino el reply 4");
           }
         });
 
