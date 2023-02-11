@@ -294,20 +294,18 @@ function main(isFirst) {
 
             console.log("\nlo adicional del mensaje: " + userContent);
 
-            /**
-                                                                                                                                                                         *  FenixBot_Clima
-                                                                                                                                                                            FENIXBOT_CLIMA
-                                                                                                                                                                            fenixbot_clima
-                                                                                                                                                                            fenixBot_clima
-                                                                                                                                                                            fenixbot_ clima
-                                                                                                                                                                            fenixbot _clima
-                                                                                                                                                                            fenix bot clima 
-                                                                                                                                                                            fenixbot123_Clima
-                                                                                                                                                                            feNIX_bOT_clima 123 
-                                                                                                                                                                            fenixBot_😬
-                                                                                                                                                                            🌀
-                                                                                                                                                                            fenix🌀
-                                                                                                                                                                          */
+            // FenixBot_Clima
+            // FENIXBOT_CLIMA
+            // fenixbot_clima
+            // fenixBot_clima
+            // fenixbot_ clima
+            // fenixbot _clima
+            // fenix bot clima
+            // fenixbot123_Clima
+            // feNIX_bOT_clima 123
+            // fenixBot_😬
+            // 🌀
+            // fenix🌀
 
             // Si existe , entonces hago un switch para ver a donde me voy
             if (botFunction) {
@@ -397,7 +395,9 @@ function main(isFirst) {
 
                 case "Clima":
                   // Extraemos la ciudad del mensaje del usuario
-                  const cityRequest = userContent[1];
+                  const cityRequest = userContent[1]
+                    ? userContent[1]
+                    : "Caracas";
 
                   ctx.reply(
                     `⏳ Consultando clima para la ciudad: ${cityRequest} ⏳`
@@ -410,38 +410,59 @@ function main(isFirst) {
                     .then(response => {
                       const data = response.data;
                       const { current, location } = data;
+
                       const weatherStatus = current.weather_descriptions[0];
 
                       ctx.reply(
-                        `🌆 Ciudad: ${location.name}\n-\n 🌡 Temperatura: ${
-                          current.temperature
-                        }°\n-\n❓ Clima: ${
-                          (weatherStatus.toLowerCase().includes("clear") ===
-                            true &&
-                            "☀️") ||
-                          (weatherStatus.toLowerCase().includes("sunny") ===
-                            true &&
-                            "☀️") ||
-                          (weatherStatus.toLowerCase().includes("cloud") ===
-                            true &&
-                            "☁️") ||
-                          (weatherStatus.toLowerCase().includes("overcast") ===
-                            true &&
-                            "☁️") ||
-                          (weatherStatus.toLowerCase().includes("rain") ===
-                            true &&
-                            "🌧") ||
-                          (weatherStatus.toLowerCase().includes("snow") ===
-                            true &&
-                            "❄️")
-                        } ${current.weather_descriptions[0]}`
+                        `🌆 Ciudad: ${location.name} - (${location.region}, ${location.country})` +
+                          `\n-\n${
+                            current.is_day == "yes" ? "🌞" : "🌙"
+                          } Hora local: ${location.localtime} ` +
+                          `\n-\n🌡 Temperatura: ${current.temperature}° ` +
+                          `\n-\n🌡 Sensación termica: ${current.feelslike}° ` +
+                          `\n-\n❓ Clima: ${
+                            (weatherStatus.toLowerCase().includes("clear") ===
+                              true &&
+                              "☀️") ||
+                            (weatherStatus.toLowerCase().includes("sunny") ===
+                              true &&
+                              "☀️") ||
+                            (weatherStatus.toLowerCase().includes("cloud") ===
+                              true &&
+                              "☁️") ||
+                            (weatherStatus
+                              .toLowerCase()
+                              .includes("overcast") === true &&
+                              "☁️") ||
+                            (weatherStatus.toLowerCase().includes("rain") ===
+                              true &&
+                              "🌧") ||
+                            (weatherStatus.toLowerCase().includes("snow") ===
+                              true &&
+                              "❄️")
+                          } ${current.weather_descriptions[0]} ` +
+                          `\n-\n☔ Prob. de precipitaciones: ${
+                            current.precip * 100
+                          }% ` +
+                          `\n-\n🌫️ Humedad: ${current.humidity}% ` +
+                          `\n-\n💨 Viento: ${current.wind_speed} km/hr `
                       );
                     })
                     .catch(error => {
                       ctx.reply(
-                        `❌ No se ha encontrado la ciudad: ${cityRequest} ❌`
+                        `❌ No se ha encontrado la ciudad: ${cityRequest} ❌` +
+                          "\n\nRecuerda que puedes consultar el clima de una ciudad escribiendo el siguiente ejemplo:" +
+                          `\n\nEj: ${botFunction.nickName} Miami`
                       );
                     });
+
+                  if (!userContent[1]) {
+                    ctx.reply(
+                      `⚠️ No has escrito ninguna ciudad ⚠️. Por defecto, se consultará el clima de la ubicación donde se encuentran los servidores de Botly.` +
+                        "\n\nRecuerda que puedes consultar el clima de una ciudad escribiendo el siguiente ejemplo:" +
+                        `\n\nEj: ${botFunction.nickName} Miami`
+                    );
+                  }
                   break;
 
                 default:
