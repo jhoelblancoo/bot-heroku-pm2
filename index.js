@@ -127,7 +127,7 @@ function main(isFirst) {
         });
 
         // Informacion del bot
-        BOT.command("info", ctx => {
+        BOT.command(["info", "Info", "informacion", "Informacion"], ctx => {
           ctx.reply(
             "🤖 Información del bot 🤖\n\n" +
               `   🆔 Alias: ${global.botInstance[element.idBot].nickname}\n\n` +
@@ -147,43 +147,69 @@ function main(isFirst) {
         });
 
         // Funciones del bot
-        BOT.command("funciones", ctx => {
-          if (global.botInstance[element.idBot].BOT_FUNCTIONS.length > 0) {
-            let funciones = [];
-            global.botInstance[element.idBot].BOT_FUNCTIONS.forEach(funcion => {
-              funciones.push(
-                `       ✅ ${funcion.nickName} - (${funcion.nameFunction}) \n\n`
+        BOT.command(
+          [
+            "funciones",
+            "Funciones",
+            "funcion",
+            "Funcion",
+            "funcionalidad",
+            "Funcionalidad",
+            "Funcionalidades",
+            "funcionalidades",
+          ],
+          ctx => {
+            if (global.botInstance[element.idBot].BOT_FUNCTIONS.length > 0) {
+              let funciones = [];
+              global.botInstance[element.idBot].BOT_FUNCTIONS.forEach(
+                funcion => {
+                  funciones.push(
+                    `       ✅ ${funcion.nickName} - (${funcion.nameFunction}) \n\n`
+                  );
+                }
               );
-            });
-            ctx.reply(
-              "🎁 Estas son las funcioness que me has agregado 🎁\n\n" +
-                funciones.join("") +
-                "⚠️ RECORDATORIO: PARA EJECUTAR UNA FUNCIÓN DEBES ESCRIBIR EXCLUSIVAMENTE EL ALIAS.⚠️\n\n" +
-                `📌Ejemplo: \n\Para ejecutar la funcion ${
-                  global.botInstance[element.idBot].BOT_FUNCTIONS[0]
-                    .nameFunction
-                }, debes escribir: ${
-                  global.botInstance[element.idBot].BOT_FUNCTIONS[0].nickName
-                }\n\n`
-            );
-          } else {
-            ctx.reply(
-              "⚠️ Este bot no posee ninguna función ⚠️\n\n" +
-                `Recuerda que puedes añadirle funciones a tus bots desde la sección Tienda, ingresando a la página web de Botly:\n${process.env.BOTLY_WEB_PAGE_SHOP}`
-            );
+              ctx.reply(
+                "🎁 Estas son las funcioness que me has agregado 🎁\n\n" +
+                  funciones.join("") +
+                  "⚠️ RECORDATORIO: PARA EJECUTAR UNA FUNCIÓN DEBES ESCRIBIR EXCLUSIVAMENTE EL ALIAS.⚠️\n\n" +
+                  `📌Ejemplo: \n\Para ejecutar la funcion ${
+                    global.botInstance[element.idBot].BOT_FUNCTIONS[0]
+                      .nameFunction
+                  }, debes escribir: ${
+                    global.botInstance[element.idBot].BOT_FUNCTIONS[0].nickName
+                  }\n\n`
+              );
+            } else {
+              ctx.reply(
+                "⚠️ Este bot no posee ninguna función ⚠️\n\n" +
+                  `Recuerda que puedes añadirle funciones a tus bots desde la sección Tienda, ingresando a la página web de Botly:\n${process.env.BOTLY_WEB_PAGE_SHOP}`
+              );
+            }
           }
-        });
+        );
 
         // Ayuda del bot
-        BOT.command("help", ctx => {
-          ctx.reply(
-            "🚨 Puedes controlarme enviando estos comandos: \n\n" +
-              "/start -    👋🏼 Bienvenida al bot\n\n" +
-              "/info -    ℹ️ Información sobre el bot\n\n" +
-              "/funciones -  🤖 Funciones del bot\n\n" +
-              `💻❔Puedes consultar nuestras preguntas frecuentes ingresando a la página web de Botly:\n${process.env.BOTLY_WEB_PAGE_FAQ}`
-          );
-        });
+        BOT.command(
+          [
+            "help",
+            "Help",
+            "ayuda",
+            "Ayuda",
+            "noentiendo",
+            "Noentiendo",
+            "nose",
+            "Nose",
+          ],
+          ctx => {
+            ctx.reply(
+              "🚨 Puedes controlarme enviando estos comandos: \n\n" +
+                "/start -    👋🏼 Bienvenida al bot\n\n" +
+                "/info -    ℹ️ Información sobre el bot\n\n" +
+                "/funciones -  🤖 Funciones del bot\n\n" +
+                `💻❔Puedes consultar nuestras preguntas frecuentes ingresando a la página web de Botly:\n${process.env.BOTLY_WEB_PAGE_FAQ}`
+            );
+          }
+        );
 
         // BOT.hears(/[A-za-z0–9_]/, ctx => {
         BOT.on("text", ctx => {
@@ -250,15 +276,38 @@ function main(isFirst) {
                 .includes(element.nickName.replace(/\s/g, "").toLowerCase())
             );
 
+            console.log("\nlo que escribe el usuario: " + userText);
+            console.log(
+              "\n El bot function encontrado: " + JSON.stringify(botFunction)
+            );
+
             // Esta variable es lo que el usuario quiere consultar 2+2 o caracas etc
             let userContent;
 
             if (botFunction) {
+              // Aqui lo hago es separar, el alias, con el resto del mensaje
               userContent = userText
-                .replace(/\s/g, "")
-                .toLowerCase()
+                // .replace(/\s/g, "")
+                // .toLowerCase()
                 .split(botFunction.nickName);
             }
+
+            console.log("\nlo adicional del mensaje: " + userContent);
+
+            /**
+                                                                                                                                                                         *  FenixBot_Clima
+                                                                                                                                                                            FENIXBOT_CLIMA
+                                                                                                                                                                            fenixbot_clima
+                                                                                                                                                                            fenixBot_clima
+                                                                                                                                                                            fenixbot_ clima
+                                                                                                                                                                            fenixbot _clima
+                                                                                                                                                                            fenix bot clima 
+                                                                                                                                                                            fenixbot123_Clima
+                                                                                                                                                                            feNIX_bOT_clima 123 
+                                                                                                                                                                            fenixBot_😬
+                                                                                                                                                                            🌀
+                                                                                                                                                                            fenix🌀
+                                                                                                                                                                          */
 
             // Si existe , entonces hago un switch para ver a donde me voy
             if (botFunction) {
@@ -307,10 +356,24 @@ function main(isFirst) {
 
                 case "Noticias populares":
                   const newsApiKey = process.env.NEWS_API_KEY;
-                  const noticia = ctx.message.text;
-                  const url = `https://newsapi.org/v2/everything?q=${noticia}&apiKey=${newsApiKey}&language=es&sortBy=popularity`;
 
-                  ctx.reply(`⏳ Consultando noticias populares (español): ⏳`);
+                  // Noticia que quiere buscar el usuario (deporte, clima, petroleo etc)
+                  const noticia = String(userContent)
+                    .replace(",", "")
+                    .replace(" ", "");
+
+                  // Url del api que trae las noticias
+                  const url = `https://newsapi.org/v2/everything?q=${
+                    noticia ? noticia : "noticia"
+                  }&apiKey=${newsApiKey}&language=es&sortBy=popularity`;
+
+                  ctx.reply(
+                    `⏳ Consultando noticias populares (español) relacionadas a: ${
+                      noticia ? noticia : "general"
+                    }⏳`
+                  );
+
+                  // llamado al api de noticias
                   axios
                     .get(url)
                     .then(response => {
@@ -324,7 +387,9 @@ function main(isFirst) {
                     })
                     .catch(error => {
                       ctx.reply(
-                        `❌ No se han encontrado resultados para noticias. ❌`
+                        `❌ No se han encontrado resultados para noticias: ${noticia}. ❌` +
+                          "\n\nRecuerda que puedes consultar una noticia escribiendo el siguiente ejemplo:" +
+                          `\n\nEj: ${botFunction.nickName} deportes`
                       );
                     });
 
@@ -348,7 +413,7 @@ function main(isFirst) {
                       const weatherStatus = current.weather_descriptions[0];
 
                       ctx.reply(
-                        `🌆 Ciudad:${location.name}\n-\n 🌡 Temperatura ${
+                        `🌆 Ciudad: ${location.name}\n-\n 🌡 Temperatura: ${
                           current.temperature
                         }°\n-\n❓ Clima: ${
                           (weatherStatus.toLowerCase().includes("clear") ===
