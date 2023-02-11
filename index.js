@@ -326,7 +326,10 @@ function main(isFirst) {
                   // );
 
                   // Extraigo la operacion del mensaje del usuario
-                  let operacion = userContent[1];
+                  let operacion = userContent[1].replace(" ", "");
+                  operacion = operacion
+                    .replaceAll(" ", "")
+                    .replaceAll(",", ".");
 
                   //url encode
                   const operacionUrlEncode = encodeURIComponent(
@@ -335,20 +338,37 @@ function main(isFirst) {
 
                   ctx.reply(`⏳ Consultando la operación: ${operacion} ⏳`);
 
-                  axios
-                    .get(
-                      `https://api.mathjs.org/v4/?expr=${operacionUrlEncode}`
-                    )
-                    .then(response => {
-                      const data = response.data;
+                  // Viene operacion
+                  if (operacion) {
+                    axios
+                      .get(
+                        `https://api.mathjs.org/v4/?expr=${operacionUrlEncode}`
+                      )
+                      .then(response => {
+                        const data = response.data;
 
-                      ctx.reply(`🧮 El resultado es: ${data}`);
-                    })
-                    .catch(error => {
-                      ctx.reply(
-                        `❌ No se ha encontrado la operación: ${operacion}. ❌`
-                      );
-                    });
+                        ctx.reply(
+                          `🧮 El resultado de ${operacion} es: \n\n ${new Intl.NumberFormat(
+                            "es-ES",
+                            { maximumFractionDigits: 2 }
+                          ).format(data)}`
+                        );
+                      })
+                      .catch(error => {
+                        ctx.reply(
+                          `❌ No se ha podido resolver la operación: ${operacion} ❌`
+                        );
+                      });
+                  }
+
+                  // No viene operacion
+                  if (!userContent[1]) {
+                    ctx.reply(
+                      `⚠️ No has escrito ninguna operación ⚠️.` +
+                        "\n\nRecuerda que puedes consultar una operación matemática escribiendo el siguiente ejemplo:" +
+                        `\n\nEj: ${botFunction.nickName} 123 * 19`
+                    );
+                  }
 
                   break;
 
