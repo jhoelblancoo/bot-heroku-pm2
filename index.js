@@ -276,11 +276,6 @@ function main(isFirst) {
                 .includes(element.nickName.replace(/\s/g, "").toLowerCase())
             );
 
-            console.log("\nlo que escribe el usuario: " + userText);
-            console.log(
-              "\n El bot function encontrado: " + JSON.stringify(botFunction)
-            );
-
             // Esta variable es lo que el usuario quiere consultar 2+2 o caracas etc
             let userContent;
 
@@ -288,24 +283,9 @@ function main(isFirst) {
               // Aqui lo hago es separar, el alias, con el resto del mensaje
               userContent = userText
                 // .replace(/\s/g, "")
-                // .toLowerCase()
-                .split(botFunction.nickName);
+                .toLowerCase()
+                .split(botFunction.nickName.toLowerCase());
             }
-
-            console.log("\nlo adicional del mensaje: " + userContent);
-
-            // FenixBot_Clima
-            // FENIXBOT_CLIMA
-            // fenixbot_clima
-            // fenixBot_clima
-            // fenixbot_ clima
-            // fenixbot _clima
-            // fenix bot clima
-            // fenixbot123_Clima
-            // feNIX_bOT_clima 123
-            // fenixBot_😬
-            // 🌀
-            // fenix🌀
 
             // Si existe , entonces hago un switch para ver a donde me voy
             if (botFunction) {
