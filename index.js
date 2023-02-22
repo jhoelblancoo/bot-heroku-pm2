@@ -468,67 +468,85 @@ function main(isFirst) {
                   break;
 
                 case "Youtube":
-                  ctx.reply("Has ejecutado youtube");
-                  let nickname = userContent[1]; // Take the nickname out of Telegraf context structure.
-                  if (nickname.length > 3) {
-                    // If user input is longer than 3 characters
-                    // Search channel based on nickname. If there is one with same user query, let's retrieve its channel ID.
-                    youtube
-                      .get_id_from_nickname(nickname)
-                      .then(channel_id => {
-                        // Let's get last uploaded videos as data structure through YouTube API (thanks to our written model).
-                        youtube
-                          .fetch_channel_uploads(channel_id)
-                          .then(structured_data => {
-                            // Let's parse those structured data to get only essential informations for video listing.
-                            youtube
-                              .parse_list_videos(structured_data)
-                              .then(video_info => {
-                                // Let's encapsulate those informations in a list that Telegraf API can digest.
-                                let new_arr = [];
-                                // For each video, extract retrieved informations for extra elaborations.
-                                for (let k in video_info) {
-                                  new_arr[k] = {
-                                    type: "video",
-                                    id: k,
-                                    title: video_info[k].title,
-                                    description: video_info[k].description,
-                                    video_url: video_info[k].url,
-                                    mime_type: "video/mp4",
-                                    thumb_url: video_info[k].thumb,
-                                    input_message_content: {
-                                      message_text:
-                                        "[BOT] " + video_info[k].url,
-                                    },
-                                  };
+                  let userSearch = userContent[1].trim(); // Take the nickname out of Telegraf context structure.
 
-                                  // Respondo la cancion con su nombre y su link
-                                  ctx.reply(
-                                    video_info[k].title +
-                                      "\n" +
-                                      video_info[k].url +
-                                      "\n"
-                                  );
+                  ctx.reply(
+                    `⏳ Consultando contenido de Youtube▶️ relacionado con: ${userSearch} ⏳`
+                  );
 
-                                  // return ctx.reply("new_arr");
-                                }
+                  try {
+                    if (userSearch.length > 0) {
+                      // If user input is longer than 3 characters
+                      // Search channel based on userSearch. If there is one with same user query, let's retrieve its channel ID.
+                      youtube
+                        .get_id_from_nickname(userSearch)
+                        .then(channel_id => {
+                          // Let's get last uploaded videos as data structure through YouTube API (thanks to our written model).
+                          youtube
+                            .fetch_channel_uploads(channel_id)
+                            .then(structured_data => {
+                              // Let's parse those structured data to get only essential informations for video listing.
+                              youtube
+                                .parse_list_videos(structured_data)
+                                .then(video_info => {
+                                  // Let's encapsulate those informations in a list that Telegraf API can digest.
+                                  let new_arr = [];
+                                  // For each video, extract retrieved informations for extra elaborations.
+                                  for (let k in video_info) {
+                                    new_arr[k] = {
+                                      type: "video",
+                                      id: k,
+                                      title: video_info[k].title,
+                                      description: video_info[k].description,
+                                      video_url: video_info[k].url,
+                                      mime_type: "video/mp4",
+                                      thumb_url: video_info[k].thumb,
+                                      input_message_content: {
+                                        message_text:
+                                          "[BOT] " + video_info[k].url,
+                                      },
+                                    };
 
-                                // Let's show this list to the user. Cache time is set to zero for development purposes.
-                                // return ctx.reply(new_arr, {
-                                //   cache_time: 0,
-                                // });
-                              })
-                              .catch(error => {
-                                ctx.reply("Error de youtube 0");
-                              });
-                          })
-                          .catch(error => {
-                            ctx.reply("Error de youtube 1");
-                          });
-                      })
-                      .catch(error => {
-                        ctx.reply("Error de youtube 2");
-                      });
+                                    // Respondo la cancion con su nombre y su link
+                                    ctx.reply(
+                                      video_info[k].title +
+                                        "\n" +
+                                        video_info[k].url +
+                                        "\n"
+                                    );
+
+                                    // return ctx.reply("new_arr");
+                                  }
+
+                                  // Let's show this list to the user. Cache time is set to zero for development purposes.
+                                  // return ctx.reply(new_arr, {
+                                  //   cache_time: 0,
+                                  // });
+                                })
+                                .catch(error => {
+                                  ctx.reply("Error de youtube 0");
+                                });
+                            })
+                            .catch(error => {
+                              ctx.reply("Error de youtube 1");
+                            });
+                        })
+                        .catch(error => {
+                          ctx.reply("Error de youtube 2");
+                        });
+                    } else {
+                      ctx.reply(
+                        `❌ No se han podido obtener resultados de Youtube para la búsqueda: ${userSearch} ❌` +
+                          "\n\nRecuerda que puedes consultar el contenido de Youtube, escribiendo el siguiente ejemplo:" +
+                          `\n\nEj: ${botFunction.nickName} michael jackson`
+                      );
+                    }
+                  } catch (error) {
+                    ctx.reply(
+                      `❌ Error en la consulta hacia los servidores de Youtube, intente nuevamente en unos minutos. ❌` +
+                        "\n\nRecuerda que puedes consultar el contenido de Youtube, escribiendo el siguiente ejemplo:" +
+                        `\n\nEj: ${botFunction.nickName} michael jackson`
+                    );
                   }
                   break;
                 default:
