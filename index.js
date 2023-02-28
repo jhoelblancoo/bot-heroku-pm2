@@ -549,6 +549,239 @@ function main(isFirst) {
                     );
                   }
                   break;
+
+                case "Películas":
+                  try {
+                    //Recibimos el mensaje de usuario
+                    const pelicula = userContent[1];
+
+                    //Se arma la url de la api
+                    const link = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.MOVIE_API_KEY}&language=es&query=${pelicula}`;
+
+                    ctx.reply(
+                      `⏳ Consultando contenido de IMDb🎥 (películas) relacionado con: ${pelicula} ⏳`
+                    );
+
+                    //Se hace la peticion a la api
+                    axios
+                      .get(link)
+                      .then(response => {
+                        //Se obtienen los resultados
+                        //En caso de error se envia un mensaje al usuario
+                        const movies = response.data.results;
+
+                        //Limitamos la cantidad de resultados a 3
+                        for (let i = 0; i < 3; i++) {
+                          //Se arma la url para obtener los datos de la pelicula
+                          const linkFind = `https://api.themoviedb.org/3/movie/${movies[i].id}?api_key=${process.env.MOVIE_API_KEY}&language=es&append_to_response=external_ids`;
+
+                          //Se hace la peticion a la api
+                          axios.get(linkFind).then(response => {
+                            //Se obtienen los resultados
+                            const film = response.data;
+
+                            //Se arma la url para obtener el trailer de la pelicula
+                            const linkVideo = `https://api.themoviedb.org/3/movie/${film.id}/videos?api_key=${process.env.MOVIE_API_KEY}&language=es`;
+
+                            //Se hace la peticion a la api
+                            axios.get(linkVideo).then(responseVideo => {
+                              //Se obtienen los resultados
+                              var video = responseVideo.data.results[0];
+
+                              //Se cambia el idioma de la pelicula por su bandera
+                              switch (film.original_language) {
+                                case "en":
+                                  film.original_language = "🇺🇸";
+                                  break;
+                                case "es":
+                                  film.original_language = "🇪🇸";
+                                  break;
+                                case "fr":
+                                  film.original_language = "🇫🇷";
+                                  break;
+                                case "de":
+                                  film.original_language = "🇩🇪";
+                                  break;
+                                case "it":
+                                  film.original_language = "🇮🇹";
+                                  break;
+                                case "ja":
+                                  film.original_language = "🇯🇵";
+                                  break;
+                                case "pt":
+                                  film.original_language = "🇵🇹";
+                                  break;
+                                case "ru":
+                                  film.original_language = "🇷🇺";
+                                  break;
+                              }
+
+                              //Se arma el mensaje
+                              let message = "";
+
+                              //Si no existe trailer se envia el mensaje sin trailer
+                              if (video === undefined) {
+                                message +=
+                                  `\n🎬 ${film.title} 🎬` +
+                                  `\n\nVer película 🍿: https://www.imdb.com/title/${film.imdb_id}` +
+                                  `\n\nFecha de estreno 📅: ${film.release_date}` +
+                                  `\n\nDuración ⏰: ${film.runtime} min` +
+                                  `\n\nPuntaje promedio (1-10) 📈: ${film.vote_average}` +
+                                  `\n\nConteo de votos 🙋: ${film.vote_count}` +
+                                  `\n\nIdioma original 🎙️: ${film.original_language}` +
+                                  `\n\nSinopsis 📝: ${film.overview}\n\n`;
+                              } else {
+                                message +=
+                                  `\n🎬 ${film.title} 🎬` +
+                                  `\n\nVer película 🍿: https://www.imdb.com/title/${film.imdb_id}\n\n` +
+                                  `Tráiler 🎥: https://www.youtube.com/watch?v=${video.key}` +
+                                  `\n\nFecha de estreno 📅: ${film.release_date}` +
+                                  `\n\nDuración ⏰: ${film.runtime} min` +
+                                  `\n\nPuntaje promedio (1-10) 📈: ${film.vote_average}` +
+                                  `\n\nConteo de votos 🙋: ${film.vote_count}` +
+                                  `\n\nIdioma original 🎙️: ${film.original_language}` +
+                                  `\n\nSinopsis 📝: ${film.overview}\n\n`;
+                              }
+
+                              //Se envia el mensaje de la pelicula al usuario
+                              ctx.reply(message);
+                            });
+                          });
+                        }
+                        //Si no hay resultados se envia un mensaje al usuario
+                      })
+                      .catch(error => {
+                        ctx.reply(
+                          `❌ No se han encontrado resultados para: ${pelicula} ❌` +
+                            "\n\nRecuerda que puedes consultar una pelicula escribiendo el siguiente ejemplo:" +
+                            `\n\nEj: ${botFunction.nickName} Avengers`
+                        );
+                      });
+                  } catch (error) {
+                    ctx.reply(
+                      `❌ No se han encontrado resultados para: ${pelicula} ❌` +
+                        "\n\nRecuerda que puedes consultar una pelicula escribiendo el siguiente ejemplo:" +
+                        `\n\nEj: ${botFunction.nickName} Avengers`
+                    );
+                  }
+                  break;
+
+                case "Series":
+                  try {
+                    //Recibimos el mensaje de usuario
+                    const serie = userContent[1];
+
+                    //Se arma la url de la api
+                    const link = `https://api.themoviedb.org/3/search/tv?api_key=${process.env.MOVIE_API_KEY}&language=es&query=${serie}`;
+
+                    ctx.reply(
+                      `⏳ Consultando contenido de IMDb🎥 (series) relacionado con: ${serie} ⏳`
+                    );
+
+                    //Se hace la peticion a la api
+                    axios
+                      .get(link)
+                      .then(response => {
+                        //Se obtienen los resultados
+                        const series = response.data.results;
+
+                        //Limitamos la cantidad de resultados a 3
+                        for (let i = 0; i < 3; i++) {
+                          //Se arma la url para obtener los datos de la serie
+                          const linkFind = `https://api.themoviedb.org/3/tv/${series[i].id}?api_key=${process.env.MOVIE_API_KEY}&language=es&append_to_response=external_ids`;
+
+                          //Se hace la peticion a la api
+                          axios.get(linkFind).then(response => {
+                            //Se obtienen los resultados
+                            const film = response.data;
+
+                            //Se arma la url para obtener el trailer de la serie
+                            const linkVideo = `https://api.themoviedb.org/3/tv/${film.id}/videos?api_key=${process.env.MOVIE_API_KEY}&language=es`;
+
+                            //Se hace la peticion a la api
+                            axios.get(linkVideo).then(responseVideo => {
+                              //Se obtienen los resultados
+                              var video = responseVideo.data.results[0];
+
+                              //Se cambia el idioma de la serie por su bandera
+                              switch (film.original_language) {
+                                case "en":
+                                  film.original_language = "🇺🇸";
+                                  break;
+                                case "es":
+                                  film.original_language = "🇪🇸";
+                                  break;
+                                case "fr":
+                                  film.original_language = "🇫🇷";
+                                  break;
+                                case "de":
+                                  film.original_language = "🇩🇪";
+                                  break;
+                                case "it":
+                                  film.original_language = "🇮🇹";
+                                  break;
+                                case "ja":
+                                  film.original_language = "🇯🇵";
+                                  break;
+                                case "pt":
+                                  film.original_language = "🇵🇹";
+                                  break;
+                                case "ru":
+                                  film.original_language = "🇷🇺";
+                                  break;
+                                case "ko":
+                                  film.original_language = "🇰🇷";
+                              }
+
+                              //Se arma el mensaje
+                              let message = "";
+
+                              //Si no existe trailer se envia el mensaje sin trailer
+                              if (video === undefined) {
+                                message +=
+                                  `\n🎬 ${film.name} 🎬` +
+                                  `\n\nVer serie 🍿: https://www.imdb.com/title/${film.external_ids.imdb_id}` +
+                                  `\n\nFecha de estreno 📅: ${film.first_air_date}` +
+                                  `\n\nPuntaje promedio (1-10) 📈: ${film.vote_average}` +
+                                  `\n\nConteo de votos 🙋: ${film.vote_count}` +
+                                  `\n\nIdioma original 🎙️: ${film.original_language}` +
+                                  `\n\nSinopsis 📝: ${film.overview}\n\n`;
+
+                                //Si existe trailer se envia el mensaje con trailer
+                              } else {
+                                message +=
+                                  `\n🎬 ${film.name} 🎬` +
+                                  `\n\nVer serie 🍿: https://www.imdb.com/title/${film.external_ids.imdb_id}` +
+                                  `\n\nTrailer 🎥: https://www.youtube.com/watch?v=${video.key}` +
+                                  `\n\nFecha de estreno 📅: ${film.first_air_date}` +
+                                  `\n\nPuntaje promedio (1-10) 📈: ${film.vote_average}` +
+                                  `\n\nConteo de votos 🙋: ${film.vote_count}` +
+                                  `\n\nIdioma original 🎙️: ${film.original_language}` +
+                                  `\n\nSinopsis 📝: ${film.overview}\n\n`;
+                              }
+
+                              //Se envia el mensaje
+                              ctx.reply(message);
+                            });
+                          });
+                        }
+                        //Si no hay resultados se envia un mensaje al usuario
+                      })
+                      .catch(error => {
+                        ctx.reply(
+                          `❌ No se han encontrado resultados para: ${serie}. ❌` +
+                            "\n\nRecuerda que puedes consultar una serie escribiendo el siguiente ejemplo:" +
+                            `\n\nEj: ${botFunction.nickName} Stranger things`
+                        );
+                      });
+                  } catch (error) {
+                    ctx.reply(
+                      `❌ No se han encontrado resultados para: ${serie}. ❌` +
+                        "\n\nRecuerda que puedes consultar una serie escribiendo el siguiente ejemplo:" +
+                        `\n\nEj: ${botFunction.nickName} Stranger things`
+                    );
+                  }
+                  break;
                 default:
                   break;
               }
